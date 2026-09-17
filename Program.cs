@@ -52,12 +52,34 @@
 // Character character =CreateCharacter();
 // Console.WriteLine($"\nTwoje imię to:{character.Name}\nMasz: {character.Age}\nTwoja klasa to: {character.ClassName}" );
 
-Character character = new Character("Geralt", -14, "Wojownik");
+Character geralt = new Character("Geralt", 14, "Wojownik");
+Character gandalf = new Character("Gandalf", 50, "Mag");
+Character vancleef = new Character("vancleef", 32,"Łotrzyk");
 
-Console.WriteLine(character.Name);
-Console.WriteLine(character.Age);
-Console.WriteLine(character.ClassName);
+List<Character> characters = new();
+characters.Add(geralt);
+characters.Add(gandalf);
+characters.Add(vancleef);
 
+foreach(Character character in characters)
+{
+    string charName = character.Name;
+    string charClass = character.ClassName;
+    Console.WriteLine($"{charName} - {charClass}");
+}
+
+// character.Attack(character2);
+// Console.WriteLine(character2.Health);
+// Console.WriteLine(character.Name);
+// Console.WriteLine(character.Age);
+// Console.WriteLine(character.ClassName);
+// Console.WriteLine(character.Health);
+// character.Attack();
+// character.TakeDamage(60);
+// character.Heal(30);
+// Console.WriteLine(character.Health);
+// character.Heal(50);
+// Console.WriteLine(character.Health);
 // Console.WriteLine($"\nTwoje imię to:{name}\nMasz: {age}\nTwoja klasa to: {character_class_name}" );
 // Character character = new Character();
 // character.Name = name;
