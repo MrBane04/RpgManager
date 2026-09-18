@@ -61,12 +61,68 @@ characters.Add(geralt);
 characters.Add(gandalf);
 characters.Add(vancleef);
 
-foreach(Character character in characters)
+Character arthur = new Character("Arthur",30,"Wojownik");
+characters.Add(arthur);
+
+// Character? foundCharacter = characters.Find(character => character.Name == "Geralt");
+// Console.WriteLine(foundCharacter.Name);
+
+// var warriors = characters.Where(character => character.ClassName == "Wojownik");
+
+var charClasses = characters.Select(character => character.ClassName);
+
+foreach(string charClass in charClasses)
 {
-    string charName = character.Name;
-    string charClass = character.ClassName;
-    Console.WriteLine($"{charName} - {charClass}");
+    Console.WriteLine(charClass);
 }
+
+
+//characters.Clear();
+
+// int numberOfCharacters = characters.Count;
+
+// Console.WriteLine($"Na liście jest:{numberOfCharacters}");
+
+// characters.Remove(gandalf);
+// characters.RemoveAt(0);
+// foreach(Character character in characters)
+// {
+//     Console.WriteLine($"{character.Name} - {character.ClassName}");
+// }
+
+
+
+// if(characters.Count == 0)
+// {
+//     Console.WriteLine("Lista jest pusta.");
+// }
+// else
+// {
+//     Console.WriteLine("Lista nie jest pusta.");
+// }
+
+// if(characters.Contains(vancleef))
+// {
+//     Console.WriteLine("Vancleef znajduje się na liście.");
+// }
+// else
+// {
+//     Console.WriteLine("Nie ma go na liście.");
+//}
+
+
+// int numberOfCharacters = characters.Count();
+// Console.WriteLine(numberOfCharacters);
+
+// Console.WriteLine($"{characters[1].Name},{characters[1].ClassName}");
+
+
+// foreach(Character character in characters)
+// {
+//     string charName = character.Name;
+//     string charClass = character.ClassName;
+//     Console.WriteLine($"{charName} - {charClass}");
+// }
 
 // character.Attack(character2);
 // Console.WriteLine(character2.Health);
