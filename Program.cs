@@ -51,30 +51,213 @@
 // }
 // Character character =CreateCharacter();
 // Console.WriteLine($"\nTwoje imię to:{character.Name}\nMasz: {character.Age}\nTwoja klasa to: {character.ClassName}" );
-
 Character geralt = new Character("Geralt", 14, "Wojownik");
 Character gandalf = new Character("Gandalf", 50, "Mag");
 Character vancleef = new Character("vancleef", 32,"Łotrzyk");
-
 List<Character> characters = new();
 characters.Add(geralt);
 characters.Add(gandalf);
 characters.Add(vancleef);
-
 Character arthur = new Character("Arthur",30,"Wojownik");
 characters.Add(arthur);
+bool running = true;
+while(running)
+{
+    Console.WriteLine("===== CHARACTER MANAGER =====\n1. Wyświetl wszystkie postacie.\n2. Znajdź postać\n3. Wyświetl wojowników\n4. Statystyki\n5. Grupowanie po klasie\n0. Wyjście\nWybierz opcję:");
+    int userChoice;
+    bool success = int.TryParse(Console.ReadLine(), out userChoice);
+    if(!success)
+    {
+        Console.WriteLine("Podaj liczbę.");
+    }
+    else
+    {
+        switch(userChoice)
+        {
+            case 1:
+                foreach(Character character in characters)
+                {
+                    Console.WriteLine($"{character.Name} - {character.ClassName} - {character.Age}");
+                }
+                break;
+            case 2:
+                Console.WriteLine("Podaj nazwę postaci:");
+                string name = Console.ReadLine();
+                Character? LFCharacter = characters.FirstOrDefault(
+                    character => character.Name == name
+                );
+                if(LFCharacter != null)
+                {
+                    Console.WriteLine($"Znaleziono:\n{LFCharacter.Name} - {LFCharacter.ClassName} - {LFCharacter.Age}");
+                }
+                else
+                {
+                    Console.WriteLine("Taka postać nie istnieje.");
+                }
+                break;
+            case 3:
+                var warriorCharacetrs = characters.Where(character => character.ClassName == "Wojownik");
+                foreach(Character character in warriorCharacetrs)
+                {
+                Console.WriteLine($"{character.Name} - {character.ClassName} - {character.Age}"); 
+                }
+                break;
+            case 4:
+                int oldestCharacter = characters.Max(character => character.Age);
+                int youngestCharacter = characters.Min(character => character.Age);
+                double averageCharacterAge = characters.Average(character => character.Age);
+                int sumHP = characters.Sum(character => character.Health);
+                Console.WriteLine($"Najstarsza postać:{oldestCharacter}\nNajmłodsza postać:{youngestCharacter}\nŚredni wiek:{averageCharacterAge}\nŁączne HP:{sumHP}");
+                break;
+            case 5:
+                var groupedCharacters = characters.GroupBy(character => character.ClassName);
+                foreach(var group in groupedCharacters)
+                {
+                    int groupCount = group.Count();
+                    Console.WriteLine($"{group.Key}-{groupCount}");
+                }
+                break;
+            case 0:
+                Console.WriteLine("Wybrano: Wyjście");
+                running = false;
+                break;
+            default:
+                Console.WriteLine("Nieprawidłowa opcja");
+                break;
+        }
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// var groupedCharacters = characters.GroupBy(character => character.ClassName);
+
+// foreach(var group in groupedCharacters)
+// {
+//     double avgAge = group.Average(character => character.Age);
+//     Console.WriteLine($"{group.Key} - średni wiek:{avgAge}");
+// }
+
+
+
+// double averageWarriorAge = characters
+//     .Where(character => character.ClassName == "Wojownik")
+//     .Average(character => character.Age);
+// Console.WriteLine(averageWarriorAge);
+
+
+// foreach(var group in groupedCharacters)
+// {
+    
+//     // int groupCount = group.Count();
+//     // Console.WriteLine($"{group.Key} - {groupCount}");
+//     // foreach(Character character in group)
+//     // {
+//     //     Console.WriteLine($"{character.Name}");
+//     // }
+// }
+
+// int totalHealth = characters
+// .Sum(character => character.Health);
+
+// Console.WriteLine(totalHealth);
+
+
+// int oldestCharacter = characters.Max(character => character.Age);
+// int youngestCharacter = characters.Min(character => character.Age);
+// double averageAge = characters.Average(character => character.Age);
+
+// Console.WriteLine($"Oldest:{oldestCharacter} Youngest:{youngestCharacter} Average:{averageAge}");
+
+
+
+// var sortedCharacters = characters
+// .OrderBy(character => character.ClassName)
+// .ThenBy(character => character.Age);
+
+// foreach(Character character in sortedCharacters)
+// {
+//     Console.WriteLine($"{character.Name} - {character.ClassName} - {character.Age}");
+// }
+
+
+
+// Character? mageCharacter = characters.FirstOrDefault(
+//     character => character.ClassName == "Mag"
+// );
+
+// if(mageCharacter != null)
+// {
+//     Console.WriteLine($"{mageCharacter.Name}");
+// }
+// else
+// {
+//     Console.WriteLine("Nie znaleziono Maga.");
+// }
+
+// if(characters.Any(character => character.ClassName == "Łotrzyk"))
+// {
+//     Console.WriteLine("Łotrzyk jest na liście.");
+// }
+// else
+// {
+//     Console.WriteLine("Łotrzyka nie ma na liście.");
+// }
+
+// if(characters.All(character => character.Age>=18))
+// {
+//     Console.WriteLine("Wszystkie postacie są pełnoletnie.");
+// }
+// else
+// {
+//     Console.WriteLine("Nie wszyskie postacie są pełnoletnie.");
+// }
+
+// int characterCount = characters.Count(
+//     character => character.ClassName == "Mag"
+// );
+// Console.WriteLine(characterCount);
+
+// var sortedCharacters = characters.OrderByDescending(
+//     character => character.Age
+// );
+
+// foreach(Character character in sortedCharacters)
+// {
+//     Console.WriteLine($"{character.Name} - {character.Age}");
+// }
+
+// var result = characters
+// .Where(character => character.ClassName == "Wojownik" && character.Age > 18)
+// .OrderByDescending(character => character.Age);
+
+// foreach(Character character in result)
+// {
+//     Console.WriteLine($"{character.Name}-{character.Age}");
+// }
 
 // Character? foundCharacter = characters.Find(character => character.Name == "Geralt");
 // Console.WriteLine(foundCharacter.Name);
 
 // var warriors = characters.Where(character => character.ClassName == "Wojownik");
 
-var charClasses = characters.Select(character => character.ClassName);
+// var charClasses = characters.Select(character => character.ClassName);
 
-foreach(string charClass in charClasses)
-{
-    Console.WriteLine(charClass);
-}
+// foreach(string charClass in charClasses)
+// {
+//     Console.WriteLine(charClass);
+// }
 
 
 //characters.Clear();
