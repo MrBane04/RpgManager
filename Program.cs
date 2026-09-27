@@ -63,7 +63,7 @@ characters.Add(arthur);
 bool running = true;
 while(running)
 {
-    Console.WriteLine("===== CHARACTER MANAGER =====\n1. Wyświetl wszystkie postacie.\n2. Znajdź postać\n3. Wyświetl wojowników\n4. Statystyki\n5. Grupowanie po klasie\n0. Wyjście\nWybierz opcję:");
+    Console.WriteLine("===== CHARACTER MANAGER =====\n1. Wyświetl wszystkie postacie.\n2. Znajdź postać\n3. Wyświetl wojowników\n4. Statystyki\n5. Grupowanie po klasie\n6. Dodaj postać\n0. Wyjście\nWybierz opcję:");
     int userChoice;
     bool success = int.TryParse(Console.ReadLine(), out userChoice);
     if(!success)
@@ -75,47 +75,22 @@ while(running)
         switch(userChoice)
         {
             case 1:
-                foreach(Character character in characters)
-                {
-                    Console.WriteLine($"{character.Name} - {character.ClassName} - {character.Age}");
-                }
+                ShowCharacters(characters);
                 break;
             case 2:
-                Console.WriteLine("Podaj nazwę postaci:");
-                string name = Console.ReadLine();
-                Character? LFCharacter = characters.FirstOrDefault(
-                    character => character.Name == name
-                );
-                if(LFCharacter != null)
-                {
-                    Console.WriteLine($"Znaleziono:\n{LFCharacter.Name} - {LFCharacter.ClassName} - {LFCharacter.Age}");
-                }
-                else
-                {
-                    Console.WriteLine("Taka postać nie istnieje.");
-                }
+                FindCharacter(characters);
                 break;
             case 3:
-                var warriorCharacetrs = characters.Where(character => character.ClassName == "Wojownik");
-                foreach(Character character in warriorCharacetrs)
-                {
-                Console.WriteLine($"{character.Name} - {character.ClassName} - {character.Age}"); 
-                }
+                ShowWarriors(characters);
                 break;
             case 4:
-                int oldestCharacter = characters.Max(character => character.Age);
-                int youngestCharacter = characters.Min(character => character.Age);
-                double averageCharacterAge = characters.Average(character => character.Age);
-                int sumHP = characters.Sum(character => character.Health);
-                Console.WriteLine($"Najstarsza postać:{oldestCharacter}\nNajmłodsza postać:{youngestCharacter}\nŚredni wiek:{averageCharacterAge}\nŁączne HP:{sumHP}");
+                ShowStatistics(characters);
                 break;
             case 5:
-                var groupedCharacters = characters.GroupBy(character => character.ClassName);
-                foreach(var group in groupedCharacters)
-                {
-                    int groupCount = group.Count();
-                    Console.WriteLine($"{group.Key}-{groupCount}");
-                }
+                ShowGroups(characters);
+                break;
+            case 6:
+                AddCharacter(characters);
                 break;
             case 0:
                 Console.WriteLine("Wybrano: Wyjście");
@@ -129,16 +104,106 @@ while(running)
 
 }
 
+static void ShowCharacters(List<Character> characters)
+{
+    foreach(Character character in characters)
+                {
+                    Console.WriteLine($"{character.Name} - {character.ClassName} - {character.Age}");
+                }
+}
 
+static void FindCharacter(List<Character> characters)
+{
+    Console.WriteLine("Podaj nazwę postaci:");
+                string name = Console.ReadLine();
+                Character? foundCharacter = characters.FirstOrDefault(
+                    character => character.Name == name
+                );
+                if(foundCharacter != null)
+                {
+                    Console.WriteLine($"Znaleziono:\n{foundCharacter.Name} - {foundCharacter.ClassName} - {foundCharacter.Age}");
+                }
+                else
+                {
+                    Console.WriteLine("Taka postać nie istnieje.");
+                }
+}
 
+static void ShowWarriors(List<Character> characters)
+{
+    var warriorCharacters = characters.Where(character => character.ClassName == "Wojownik");
+                foreach(Character character in warriorCharacters)
+                {
+                Console.WriteLine($"{character.Name} - {character.ClassName} - {character.Age}"); 
+                }
+}
 
+static void ShowStatistics(List<Character> characters)
+{
+    int oldestCharacter = characters.Max(character => character.Age);
+                int youngestCharacter = characters.Min(character => character.Age);
+                double averageCharacterAge = characters.Average(character => character.Age);
+                int sumHP = characters.Sum(character => character.Health);
+                Console.WriteLine($"Najstarsza postać:{oldestCharacter}\nNajmłodsza postać:{youngestCharacter}\nŚredni wiek:{averageCharacterAge}\nŁączne HP:{sumHP}");
+}
 
+static void ShowGroups(List<Character> characters)
+{
+    var groupedCharacters = characters.GroupBy(character => character.ClassName);
+                foreach(var group in groupedCharacters)
+                {
+                    int groupCount = group.Count();
+                    Console.WriteLine($"{group.Key}-{groupCount}");
+                }
+}
 
+static void AddCharacter(List<Character> characters)
+{
+    Console.WriteLine("Podaj imię postaci: ");
+    string name = Console.ReadLine();
 
+    int age;
 
-
-
-
+    while(true)
+    {
+        Console.WriteLine("Podaj wiek postaci: ");
+        bool success = int.TryParse(Console.ReadLine(),out age);
+        if(success && age>0)
+        {
+            break;
+        }
+        Console.WriteLine("Podaj poprawny wiek");
+    }
+    string className = "";
+    while(true)
+    {
+        Console.WriteLine("Wybierz klasę postaci:\n1. Wojownik\n2. Mag\n3. Łotrzyk");
+        int classChoice;
+        bool classChoiceSuccess = int.TryParse(Console.ReadLine(),out classChoice);
+        
+        if(classChoiceSuccess && classChoice >= 1 && classChoice <= 3)
+        {
+            switch(classChoice)
+            {
+                case 1:
+                    className = "Wojownik";
+                    break;
+                case 2:
+                    className = "Mag";
+                    break;
+                case 3:
+                    className = "Łotrzyk";
+                    break;
+                default:
+                    Console.WriteLine("Wybierz poprawną klasę!!!");
+                    break;
+            }
+            break;
+        }
+    }
+    Character character = new Character(name,age,className);
+    characters.Add(character);
+}
 
 
 // var groupedCharacters = characters.GroupBy(character => character.ClassName);
