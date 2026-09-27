@@ -63,7 +63,7 @@ characters.Add(arthur);
 bool running = true;
 while(running)
 {
-    Console.WriteLine("===== CHARACTER MANAGER =====\n1. Wyświetl wszystkie postacie.\n2. Znajdź postać\n3. Wyświetl wojowników\n4. Statystyki\n5. Grupowanie po klasie\n6. Dodaj postać\n0. Wyjście\nWybierz opcję:");
+    Console.WriteLine("===== CHARACTER MANAGER =====\n1. Wyświetl wszystkie postacie.\n2. Znajdź postać\n3. Wyświetl wojowników\n4. Statystyki\n5. Grupowanie po klasie\n6. Dodaj postać\n7. Usuń postać\n0. Wyjście\nWybierz opcję:");
     int userChoice;
     bool success = int.TryParse(Console.ReadLine(), out userChoice);
     if(!success)
@@ -91,6 +91,9 @@ while(running)
                 break;
             case 6:
                 AddCharacter(characters);
+                break;
+            case 7:
+                RemoveCharacter(characters);
                 break;
             case 0:
                 Console.WriteLine("Wybrano: Wyjście");
@@ -204,6 +207,26 @@ static void AddCharacter(List<Character> characters)
     Character character = new Character(name,age,className);
     characters.Add(character);
 }
+
+static void RemoveCharacter(List<Character> characters)
+{
+    Console.WriteLine("Podaj nazwę postaci: ");
+    string name = Console.ReadLine();
+
+    Character? foundCharacter = characters.FirstOrDefault(character => character.Name == name);
+
+    if(foundCharacter == null)
+    {
+        Console.WriteLine("Taka postać nie istnieje.");
+    }
+    else
+    {
+        characters.Remove(foundCharacter);
+        Console.WriteLine("Usunięto postać pomyślnie.");
+    }
+}
+
+
 
 
 // var groupedCharacters = characters.GroupBy(character => character.ClassName);
