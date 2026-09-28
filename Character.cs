@@ -33,8 +33,8 @@ class Character
             }
         } 
     }
-    public string ClassName { get; set; }
-    public Character(string characterName, int characterAge, string characterClassName)
+    public CharacterClass ClassName { get; set; }
+    public Character(string characterName, int characterAge, CharacterClass characterClassName)
     {
         Name = characterName;
         Age = characterAge;
@@ -49,13 +49,13 @@ class Character
 
         switch(this.ClassName)
         {
-            case "Wojownik":
+            case CharacterClass.Warrior:
                 damage = 20;
                 break;
-            case "Mag":
+            case CharacterClass.Mage:
                 damage = 30;
                 break;
-            case "Łotrzyk":
+            case CharacterClass.Rogue:
                 damage = 25;
                 break;
             default:

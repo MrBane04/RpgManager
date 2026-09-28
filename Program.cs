@@ -51,14 +51,14 @@
 // }
 // Character character =CreateCharacter();
 // Console.WriteLine($"\nTwoje imię to:{character.Name}\nMasz: {character.Age}\nTwoja klasa to: {character.ClassName}" );
-Character geralt = new Character("Geralt", 14, "Wojownik");
-Character gandalf = new Character("Gandalf", 50, "Mag");
-Character vancleef = new Character("vancleef", 32,"Łotrzyk");
+Character geralt = new Character("Geralt", 14, CharacterClass.Warrior);
+Character gandalf = new Character("Gandalf", 50, CharacterClass.Mage);
+Character vancleef = new Character("vancleef", 32,CharacterClass.Rogue);
 List<Character> characters = new();
 characters.Add(geralt);
 characters.Add(gandalf);
 characters.Add(vancleef);
-Character arthur = new Character("Arthur",30,"Wojownik");
+Character arthur = new Character("Arthur",30,CharacterClass.Warrior);
 characters.Add(arthur);
 bool running = true;
 while(running)
@@ -137,7 +137,7 @@ static void FindCharacter(List<Character> characters)
 
 static void ShowWarriors(List<Character> characters)
 {
-    var warriorCharacters = characters.Where(character => character.ClassName == "Wojownik");
+    var warriorCharacters = characters.Where(character => character.ClassName == CharacterClass.Warrior);
                 foreach(Character character in warriorCharacters)
                 {
                 Console.WriteLine($"{character.Name} - {character.ClassName} - {character.Age}"); 
@@ -180,7 +180,7 @@ static void AddCharacter(List<Character> characters)
         }
         Console.WriteLine("Podaj poprawny wiek");
     }
-    string className = "";
+    CharacterClass className = CharacterClass.None;
     while(true)
     {
         Console.WriteLine("Wybierz klasę postaci:\n1. Wojownik\n2. Mag\n3. Łotrzyk");
@@ -192,13 +192,13 @@ static void AddCharacter(List<Character> characters)
             switch(classChoice)
             {
                 case 1:
-                    className = "Wojownik";
+                    className = CharacterClass.Warrior;
                     break;
                 case 2:
-                    className = "Mag";
+                    className = CharacterClass.Mage;
                     break;
                 case 3:
-                    className = "Łotrzyk";
+                    className = CharacterClass.Rogue;
                     break;
                 default:
                     Console.WriteLine("Wybierz poprawną klasę!!!");
@@ -281,13 +281,13 @@ static void EditCharacter(List<Character> characters)
                             switch(newClass)
                             {
                                 case 1:
-                                    foundCharacter.ClassName = "Wojownik";
+                                    foundCharacter.ClassName = CharacterClass.Warrior;
                                     break;
                                 case 2:
-                                    foundCharacter.ClassName = "Mag";
+                                    foundCharacter.ClassName = CharacterClass.Mage;
                                     break;
                                 case 3:
-                                    foundCharacter.ClassName = "Łotrzyk";
+                                    foundCharacter.ClassName = CharacterClass.Rogue;
                                     break;
                                 default:
                                     Console.WriteLine("Wybierz poprawną klasę.");
