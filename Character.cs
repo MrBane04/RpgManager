@@ -101,4 +101,9 @@ class Character
         }
         
     }
+
+    public void ShowInfo()
+    {
+        Console.WriteLine($"Imię: {this.Name}\nWiek: {this.Age}\nKlasa: {this.ClassName}\nHP: {this.Health}");
+    }
 }

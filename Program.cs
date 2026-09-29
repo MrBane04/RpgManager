@@ -189,21 +189,7 @@ static void AddCharacter(List<Character> characters)
         
         if(classChoiceSuccess && classChoice >= 1 && classChoice <= 3)
         {
-            switch(classChoice)
-            {
-                case 1:
-                    className = CharacterClass.Warrior;
-                    break;
-                case 2:
-                    className = CharacterClass.Mage;
-                    break;
-                case 3:
-                    className = CharacterClass.Rogue;
-                    break;
-                default:
-                    Console.WriteLine("Wybierz poprawną klasę!!!");
-                    break;
-            }
+            className = GetCharacterClass(classChoice);
             break;
         }
     }
@@ -311,6 +297,23 @@ static void EditCharacter(List<Character> characters)
         Console.WriteLine("Taka postać nie istnieje.");
     }
 }
+
+static CharacterClass GetCharacterClass(int choice)
+{
+    switch(choice)
+    {
+        case 1:
+            return CharacterClass.Warrior;
+        case 2:
+            return CharacterClass.Mage;
+        case 3:
+            return CharacterClass.Rogue;
+        default:
+            return CharacterClass.None;
+    }
+}
+
+
 
 
 // var groupedCharacters = characters.GroupBy(character => character.ClassName);
