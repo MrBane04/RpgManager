@@ -1,23 +1,7 @@
 class Character
 {
     private int _age;
-    private int _health;
-    public int Health { 
-        get
-        {
-            return _health;
-        }
-        set
-        {
-            if(value > 0)
-            {
-                _health = value;
-            }
-            else
-            {
-                _health = 0;
-            }
-        } }
+    public int Health { get; private set; }
     public string Name { get; set; }
     public int Age 
     { 
@@ -69,11 +53,18 @@ class Character
 
     public void TakeDamage(int damage)
     {
-        if(Health > 0)
+        if(Health > 0 )
         {
             this.Health = Health-damage;
+
+            if(this.Health < 0)
+            {
+                this.Health = 0;
+            }
+              
             Console.WriteLine($"{Name} otrzymał {damage} obrażeń!");
             Console.WriteLine($"Pozostałe HP:{Health}");
+            
         }
         else
         {
