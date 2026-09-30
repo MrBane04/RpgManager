@@ -15,66 +15,66 @@ class CharacterManager
         }
     }
 
-    public void FindCharacter()
+    public Character? FindCharacter(string name)
     {
-        Console.WriteLine("Podaj nazwę postaci:");
-                string name = Console.ReadLine();
                 Character? foundCharacter = characters.FirstOrDefault(
                     character => character.Name == name
                 );
                 if(foundCharacter != null)
                 {
-                    Console.WriteLine($"Znaleziono:\n{foundCharacter.Name} - {foundCharacter.ClassName} - {foundCharacter.Age}");
+                    return foundCharacter;
                 }
                 else
                 {
-                    Console.WriteLine("Taka postać nie istnieje.");
+                    return null;
                 }
     }
 
-    public void ShowWarriors()
+    public IEnumerable<Character> ShowWarriors()
     {
-        var warriorCharacters = characters.Where(character => character.ClassName == CharacterClass.Warrior);
-                foreach(Character character in warriorCharacters)
-                {
-                Console.WriteLine($"{character.Name} - {character.ClassName} - {character.Age}"); 
-                }
+        IEnumerable<Character> warriorCharacters = characters.Where(character => character.ClassName == CharacterClass.Warrior);
+        return warriorCharacters;
     }
 
-    public void ShowStatistics()
+    public CharacterStatistics ShowStatistics()
     {
+        CharacterStatistics characterStatistisc = new CharacterStatistics();
         int oldestCharacter = characters.Max(character => character.Age);
-                int youngestCharacter = characters.Min(character => character.Age);
-                double averageCharacterAge = characters.Average(character => character.Age);
-                int sumHP = characters.Sum(character => character.Health);
-                Console.WriteLine($"Najstarsza postać:{oldestCharacter}\nNajmłodsza postać:{youngestCharacter}\nŚredni wiek:{averageCharacterAge}\nŁączne HP:{sumHP}");
+        int youngestCharacter = characters.Min(character => character.Age);
+        double averageCharacterAge = characters.Average(character => character.Age);
+        int sumHP = characters.Sum(character => character.Health);
+        characterStatistisc.OldestCharacter = oldestCharacter;
+        characterStatistisc.YoungestCharacter = youngestCharacter;
+        characterStatistisc.AverageCharacterAge = averageCharacterAge;
+        characterStatistisc.SumHP = sumHP;
+        return characterStatistisc;
     }
 
-    public void ShowGroups()
+    public IEnumerable<IGrouping<CharacterClass, Character>> ShowGroups()
     {
-        var groupedCharacters = characters.GroupBy(character => character.ClassName);
-                foreach(var group in groupedCharacters)
-                {
-                    int groupCount = group.Count();
-                    Console.WriteLine($"{group.Key}-{groupCount}");
-                }
+        IEnumerable<IGrouping<CharacterClass, Character>> groupedCharacters = characters.GroupBy(character => character.ClassName);
+        return groupedCharacters;
+                // foreach(var group in groupedCharacters)
+                // {
+                //     int groupCount = group.Count();
+                //     Console.WriteLine($"{group.Key}-{groupCount}");
+                // }
     }
 
-    public void RemoveCharacter()
+    public bool RemoveCharacter(string name)
     {
-        Console.WriteLine("Podaj nazwę postaci: ");
-    string name = Console.ReadLine();
+        
 
     Character? foundCharacter = characters.FirstOrDefault(character => character.Name == name);
 
     if(foundCharacter == null)
     {
-        Console.WriteLine("Taka postać nie istnieje.");
+        return false;
     }
     else
     {
         characters.Remove(foundCharacter);
-        Console.WriteLine("Usunięto postać pomyślnie.");
+        return true;
     }
     }
 

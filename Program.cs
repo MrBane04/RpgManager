@@ -29,22 +29,52 @@ while(running)
                 manager.ShowCharacters();
                 break;
             case 2:
-                manager.FindCharacter();
+                Console.WriteLine("Podaj nazwę postaci: ");
+                string name = Console.ReadLine();
+                Character? foundCharacter = manager.FindCharacter(name);
+                if(foundCharacter != null)
+                {
+                    Console.WriteLine($"Znaleziono:\n{foundCharacter.Name} - {foundCharacter.ClassName} - {foundCharacter.Age}");
+                }
+                else
+                {
+                    Console.WriteLine("Taka postać nie istnieje.");
+                }
                 break;
             case 3:
-                manager.ShowWarriors();
+                IEnumerable<Character> warriorList = manager.ShowWarriors();
+                foreach(Character warrior in warriorList)
+                {
+                    Console.WriteLine($"{warrior.Name} - {warrior.Age}");
+                }
                 break;
             case 4:
-                manager.ShowStatistics();
+                CharacterStatistics statistics = manager.ShowStatistics();
+                Console.WriteLine($"Najstarsza: {statistics.OldestCharacter}\nNajmłodsza: {statistics.YoungestCharacter}\nŚredni wiek: {statistics.AverageCharacterAge}\nŁączne HP: {statistics.SumHP}");
                 break;
             case 5:
-                manager.ShowGroups();
+                IEnumerable<IGrouping<CharacterClass, Character>> groups = manager.ShowGroups();
+                foreach(var group in groups)
+                {
+                    int groupCount = group.Count();
+                    Console.WriteLine($"{group.Key} - {groupCount}");
+                }
                 break;
             case 6:
                 AddCharacter(manager);
                 break;
             case 7:
-                manager.RemoveCharacter();
+                Console.WriteLine("Podaj nazwę postaci do usunięcia: ");
+                string nameRemove = Console.ReadLine();
+                bool removed = manager.RemoveCharacter(nameRemove);
+                if(removed)
+                {
+                    Console.WriteLine("Postać zostałą usunięta.");
+                }
+                else
+                {
+                    Console.WriteLine("Taka postać nie istnieje.");
+                }
                 break;
             case 8:
                 manager.EditCharacter();
