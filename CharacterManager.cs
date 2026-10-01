@@ -78,16 +78,14 @@ class CharacterManager
     }
     }
 
-    public void EditCharacter()
+    public void EditCharacter(string name)
     {
-        Console.WriteLine("Podaj nazwę postaci: ");
-    string name = Console.ReadLine();
-    Character? foundCharacter = characters.FirstOrDefault(character => character.Name == name);
+        Character? foundCharacter = FindCharacter(name);
 
     if(foundCharacter != null)
     {
         Console.WriteLine($"{foundCharacter.Name} - {foundCharacter.ClassName} - {foundCharacter.Age}");
-        Console.WriteLine("Co chcesz zmienić?\n1. Imię\n2. Wiek\n3. Klasę\n0. Anuluj");
+        
         int choice;
         bool success = int.TryParse(Console.ReadLine(),out choice);
 
@@ -159,5 +157,20 @@ class CharacterManager
     {
         Console.WriteLine("Taka postać nie istnieje.");
     }
+    }
+
+    public void ChangeName(Character character, string newName)
+    {
+        character.Name = newName;
+    }
+
+    public void ChangeAge(Character character, int newAge)
+    {
+        character.Age = newAge;
+    }
+
+    public void ChangeClass(Character character, CharacterClass newClass)
+    {
+        character.ClassName = newClass;
     }
 }

@@ -77,7 +77,68 @@ while(running)
                 }
                 break;
             case 8:
-                manager.EditCharacter();
+                Console.WriteLine("Podaj nazwę postaci do zmiany: ");
+                string nameEdit = Console.ReadLine();
+                Character? foundCharacterEdit = manager.FindCharacter(nameEdit);
+                if(foundCharacterEdit != null)
+                {
+                    Console.WriteLine($"{foundCharacterEdit.Name} - {foundCharacterEdit.Age} - {foundCharacterEdit.ClassName}");
+                    Console.WriteLine("Co chcesz zmienić?\n1. Imię\n2. Wiek\n3. Klasę\n0. Anuluj");
+                    int choice;
+                    bool choiceSuccess = int.TryParse(Console.ReadLine(), out choice);
+                    if(choiceSuccess)
+                    {
+                        switch(choice)
+                        {
+                            case 1:
+                                Console.WriteLine("Podaj nowe imię: ");
+                                string newName = Console.ReadLine();
+                                manager.ChangeName(foundCharacterEdit,newName);
+                                break;
+                            case 2:
+                                while(true)
+                                {
+                                    Console.WriteLine("Podaj nowy wiek postaci: ");
+                                    int newAge;
+                                    bool ageSuccess = int.TryParse(Console.ReadLine(),out newAge); 
+
+                                    if(ageSuccess && newAge > 0)
+                                    {
+                                        manager.ChangeAge(foundCharacterEdit, newAge);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Podaj poprawny wiek");
+                                    }
+                                }
+                                break;
+                            case 3:
+                                while(true)
+                                {
+                                    Console.WriteLine("Wybierz nową klasę postaci:\n1. Wojownik\n2. Mag\n3. Łotrzyk");
+                                    int newClass;
+                                    bool classSuccess = int.TryParse(Console.ReadLine(),out newClass);
+
+                                     if(classSuccess && newClass >=1 && newClass <= 3)
+                                     {
+                                        CharacterClass selectedClass = GetCharacterClass(newClass);
+                                        manager.ChangeClass(foundCharacterEdit,selectedClass);
+                                        break;
+                                     }
+                                }
+                                break;
+                            case 0:
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                else 
+                {
+                    Console.WriteLine("Taka postać nie istnieje.");
+                }
                 break;
             case 0:
                 Console.WriteLine("Wybrano: Wyjście");
