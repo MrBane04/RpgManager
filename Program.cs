@@ -1,15 +1,19 @@
 ﻿
 CharacterManager manager = new CharacterManager();
-Character geralt = new Character("Geralt", 14, CharacterClass.Warrior);
-Character gandalf = new Character("Gandalf", 50, CharacterClass.Mage);
-Character vancleef = new Character("vancleef", 32,CharacterClass.Rogue);
-Character arthur = new Character("Arthur",30,CharacterClass.Warrior);
-manager.AddCharacter(geralt);
-manager.AddCharacter(gandalf);
-manager.AddCharacter(vancleef);
-manager.AddCharacter(arthur);
+List<CharacterData> characterData = new()
+{
+    new CharacterData("Geralt", -5, CharacterClass.Warrior),
+    new CharacterData("Gandalf", 50, CharacterClass.Mage),
+    new CharacterData("vancleef", 32, CharacterClass.Rogue),
+    new CharacterData("Arthur", 30, CharacterClass.Warrior)
+};
 
+IEnumerable<string> errors = manager.LoadCharacters(characterData);
 
+foreach(string error in errors)
+{
+    Console.WriteLine(error);
+}
 
 bool running = true;
 while(running)

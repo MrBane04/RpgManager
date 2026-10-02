@@ -1,8 +1,21 @@
 class Character
 {
     private int _age;
+    private string _name;
     public int Health { get; private set; }
-    public string Name { get; set; }
+    public string Name { 
+        get
+        {
+            return _name;
+        } 
+        set
+        {
+            bool validName = string.IsNullOrWhiteSpace(value);
+            if(!validName)
+            {
+                _name = value;
+            }
+        } }
     public int Age 
     { 
         get
@@ -14,6 +27,10 @@ class Character
             if(value>0)
             {
                 _age = value;
+            }
+            else
+            {
+                throw new ArgumentException("Wiek postaci musi być większy od 0.");
             }
         } 
     }

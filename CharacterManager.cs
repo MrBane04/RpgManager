@@ -176,4 +176,22 @@ class CharacterManager
         IEnumerable<Character> afterCheck = characters.Where(character => character.Age >= minAge);
         return afterCheck;
     }
+    
+    public IEnumerable<string> LoadCharacters(IEnumerable<CharacterData> characterData)
+    {
+        List<string> errors = new();
+        foreach(CharacterData data in characterData)
+        {
+            try
+            {
+                Character character = new Character(data.Name,data.Age,data.CharacterClass);
+                AddCharacter(character);
+            }
+            catch(ArgumentException ex)
+            {
+                errors.Add(ex.Message);
+            }
+        }
+        return errors;
+    } 
 }
