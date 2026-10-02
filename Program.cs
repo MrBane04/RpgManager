@@ -14,7 +14,7 @@ manager.AddCharacter(arthur);
 bool running = true;
 while(running)
 {
-    Console.WriteLine("===== CHARACTER MANAGER =====\n1. Wyświetl wszystkie postacie.\n2. Znajdź postać\n3. Wyświetl wojowników\n4. Statystyki\n5. Grupowanie po klasie\n6. Dodaj postać\n7. Usuń postać\n8. Edytuj postać\n0. Wyjście\nWybierz opcję:");
+    Console.WriteLine("===== CHARACTER MANAGER =====\n1. Wyświetl wszystkie postacie.\n2. Znajdź postać\n3. Wyświetl wojowników\n4. Statystyki\n5. Grupowanie po klasie\n6. Dodaj postać\n7. Usuń postać\n8. Edytuj postać\n9. Postacie od podanego wieku\n0. Wyjście\nWybierz opcję:");
     int userChoice;
     bool success = int.TryParse(Console.ReadLine(), out userChoice);
     if(!success)
@@ -26,7 +26,12 @@ while(running)
         switch(userChoice)
         {
             case 1:
-                manager.ShowCharacters();
+                IEnumerable<Character> listCharacters = manager.ShowCharacters();
+                foreach(Character character in listCharacters)
+                {
+                    Console.WriteLine($"{character.Name} - {character.Age} - {character.ClassName}");
+                }
+
                 break;
             case 2:
                 Console.WriteLine("Podaj nazwę postaci: ");
@@ -138,6 +143,24 @@ while(running)
                 else 
                 {
                     Console.WriteLine("Taka postać nie istnieje.");
+                }
+                break;
+            case 9:
+                Console.WriteLine("Podaj minimalny wiek postaci: ");
+                int minAge;
+                bool minAgeSucess = int.TryParse(Console.ReadLine(), out minAge);
+
+                if(minAgeSucess)
+                {
+                    IEnumerable<Character> minAgeCharacters = manager.GetCharacterOlderThan(minAge);
+                    foreach(Character character in minAgeCharacters)
+                    {
+                        Console.WriteLine($"{character.Name} - {character.Age} - {character.ClassName}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Podaj poprawną wartość.");
                 }
                 break;
             case 0:

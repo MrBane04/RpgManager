@@ -7,12 +7,9 @@ class CharacterManager
         characters.Add(character);
     }
 
-    public void ShowCharacters()
+    public IEnumerable<Character> ShowCharacters()
     {
-        foreach(Character character in characters)
-        {
-            character.ShowInfo();
-        }
+        return characters;
     }
 
     public Character? FindCharacter(string name)
@@ -65,7 +62,7 @@ class CharacterManager
     {
         
 
-    Character? foundCharacter = characters.FirstOrDefault(character => character.Name == name);
+    Character? foundCharacter = FindCharacter(name);
 
     if(foundCharacter == null)
     {
@@ -172,5 +169,11 @@ class CharacterManager
     public void ChangeClass(Character character, CharacterClass newClass)
     {
         character.ClassName = newClass;
+    }
+
+    public IEnumerable<Character> GetCharacterOlderThan(int minAge)
+    {
+        IEnumerable<Character> afterCheck = characters.Where(character => character.Age >= minAge);
+        return afterCheck;
     }
 }
