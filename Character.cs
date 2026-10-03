@@ -1,4 +1,4 @@
-class Character
+class Character : IAttacker
 {
     private int _age;
     private string _name;
@@ -43,7 +43,7 @@ class Character
         Health = 100;
     }
 
-    public void Attack(Character target)
+    public virtual void Attack(Character target)
     {
         Console.WriteLine($"{this.Name} cię atakuje.");
         int damage;
