@@ -1,0 +1,6 @@
+@RpgManager_HostAddress = http://localhost:5022
+
+GET {{RpgManager_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
