@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="RpgManager.Core/RpgManager.Core.csproj" Id="48992bcc-dafd-4bdb-ba0e-886b08148819" />
+  <Project Path="RpgManager/RpgManager.csproj" />
+</Solution>
