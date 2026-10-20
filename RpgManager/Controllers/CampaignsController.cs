@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RpgManager.Services;
+using RpgManager.Core.Services;
 using RpgManager.DTOs;
 
 namespace RpgManager.Controllers

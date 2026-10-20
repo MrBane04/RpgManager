@@ -1,4 +1,4 @@
-﻿namespace RpgManager.Services
+﻿namespace RpgManager.Core.Services
 {
     public class CampaignService
     {

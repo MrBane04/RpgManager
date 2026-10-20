@@ -1,4 +1,4 @@
-using RpgManager.Services;
+using RpgManager.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
