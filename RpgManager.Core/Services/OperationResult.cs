@@ -2,13 +2,13 @@
 {
     public class OperationResult
     {
-        public bool Success { get; set; }
-        public string Text { get; set; }
+        public bool Success { get;}
+        public string Message { get;}
 
-        public OperationResult(bool success, string text)
+        public OperationResult(bool success, string message)
         {
             this.Success = success;
-            this.Text = text;
+            this.Message = message;
         }
     }
 }
