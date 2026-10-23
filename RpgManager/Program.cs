@@ -1,8 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using RpgManager.Core.Data;
 using RpgManager.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<CampaignService>();
+
+builder.Services.AddDbContext<RpgManagerDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
 

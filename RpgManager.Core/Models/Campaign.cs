@@ -30,9 +30,10 @@
                 }
             } 
         }
-        public string  Status { get; set; }
+        public CampaignStatus  Status { get; set; }
+        public int Id { get; set; }
 
-        public Campaign (string name, string system, string status)
+        public Campaign (string name, string system, CampaignStatus status)
         {
             this.Name = name;
             this.System = system;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RpgManager.Core.Services;
 using RpgManager.DTOs;
+using RpgManager.Core.Models;
 
 namespace RpgManager.Controllers
 {
@@ -18,14 +19,18 @@ namespace RpgManager.Controllers
         [HttpPost]
         public IActionResult CreateCampaign([FromBody] CreateCampaignRequest request)
         {
-            OperationResult result = _campaignService.CreateCampaign(request.Name);
+            if (!Enum.TryParse<CampaignStatus>(request.Status,true, out var status) || !Enum.IsDefined(status))
+            {
+                return BadRequest("Nieprawidłowy status kampanii.");
+            }
+            OperationResult result = _campaignService.CreateCampaign(request.Name, request.System, status);
             if(result.Success)
             {
                 return Ok(result);
             }
             else
             {
-                return BadRequest(result.Text);
+                return BadRequest(result.Message);
             }
         }
     }
