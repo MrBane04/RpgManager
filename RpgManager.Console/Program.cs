@@ -16,7 +16,7 @@ var options = new DbContextOptionsBuilder<RpgManagerDbContext>()
 
 using var dbContext = new RpgManagerDbContext(options);
 
-CampaignService campaignService = new CampaignService();
+CampaignService campaignService = new CampaignService(dbContext);
 
 ConsoleApp consoleApp = new ConsoleApp(campaignService);
 

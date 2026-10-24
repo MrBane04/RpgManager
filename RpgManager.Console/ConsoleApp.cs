@@ -19,7 +19,7 @@ namespace RpgManager.Console
             {
                 var choice = new SelectionPrompt<string>()
                 .Title("RPG Manager - menu główne")
-                .AddChoices("Dodaj kampanię", "Moje kampanie","Usuń kampanie", "Sesja RPG", "Wyjście");
+                .AddChoices("Dodaj kampanię", "Moje kampanie","Sesja RPG", "Wyjście");
 
                 var selectedOption = AnsiConsole.Prompt(choice);
 
@@ -31,10 +31,7 @@ namespace RpgManager.Console
                         AddCampaign();
                         break;
                     case "Moje kampanie":
-                        ShowCampaigns();
-                        break;
-                    case "Usuń kampanie":
-                        DeleteCampaign();
+                        CampaignMenu();
                         break;
                     case "Sesja RPG":
                         AnsiConsole.MarkupLine("Wybrano sesje");
@@ -69,9 +66,40 @@ namespace RpgManager.Console
 
         }
 
+        private void CampaignMenu()
+        {
+            bool isRunningCM = true;
+
+            while(isRunningCM)
+            {
+                var choiceCM = new SelectionPrompt<string>()
+                .Title("Campaign Menu")
+                .AddChoices("Wyświetl kampanie", "Edtytuj kampanie", "Usuń kampanie", "Powrót");
+
+                var selectedOptionCM = AnsiConsole.Prompt(choiceCM);
+
+                switch (selectedOptionCM)
+                {
+                    case "Wyświetl kampanie":
+                        ShowCampaigns();
+                        break;
+                    case "Edtytuj kampanie":
+                        break;
+                    case "Usuń kampanie":
+                        DeleteCampaign();
+                        break;
+                    case "Powrót":
+                        isRunningCM = false;
+                        break;
+                }
+            }
+        }
         private void DeleteCampaign()
         {
             ShowCampaigns();
+            int id = AnsiConsole.Ask<int>("Podaj id kampanii do usunięcia: ");
+            OperationResult result = _campaignService.DeleteCampaign(id);
+            AnsiConsole.WriteLine(result.Message);
 
         }
 
