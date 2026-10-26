@@ -16,7 +16,7 @@ namespace RpgManager.Core.Services
         {
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(system) || !Enum.IsDefined(status))
             {
-                OperationResult resultFail = new OperationResult(false, "Podaj poprawną wartość.");
+                OperationResult resultFail = new OperationResult(false, "Name, system lub status jest niepoprawny.");
                 return resultFail;
             }
             else
@@ -41,6 +41,11 @@ namespace RpgManager.Core.Services
             {
                 OperationResult resultFail = new OperationResult(false, "Kampania o podanym id nie istnieje.");
                 return resultFail;
+            }
+            else if(string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(system) || !Enum.IsDefined(status))
+            {
+                OperationResult resultFailArguments = new OperationResult(false, "Name, system lub status jest niepoprawny.");
+                return resultFailArguments;
             }
             else
             {

@@ -86,8 +86,26 @@ namespace RpgManager.Console
                     case "Edytuj kampanie":
                         ShowCampaigns();
                         int id = AnsiConsole.Ask<int>("Podaj id kampanii do edycji: ");
-
-                        _campaignService.EditCampaign();
+                        string name = AnsiConsole.Ask<string>("Podaj nową nazwę kampanii: ");
+                        string system = AnsiConsole.Prompt(
+                            new SelectionPrompt<string>()
+                                .Title("Wybierz system RPG")
+                                .AddChoices("DND", "Jedyny Pierścień")
+                            );
+                        CampaignStatus status = AnsiConsole.Prompt(
+                            new SelectionPrompt<CampaignStatus>()
+                                .Title("Wybierz status kampanii")
+                                .AddChoices(CampaignStatus.Aktywna, CampaignStatus.Wygasła)
+                            );
+                        OperationResult result = _campaignService.EditCampaign(id,name,system,status);
+                        if(result.Success)
+                        {
+                            AnsiConsole.MarkupLine($"[green]{result.Message}[/]");
+                        }
+                        else
+                        {
+                            AnsiConsole.MarkupLine($"[red]{result.Message}[/]");
+                        }
                         break;
                     case "Usuń kampanie":
                         DeleteCampaign();
