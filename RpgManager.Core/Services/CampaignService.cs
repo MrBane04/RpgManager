@@ -34,6 +34,25 @@ namespace RpgManager.Core.Services
             return _dbContext.Campaigns.ToList();
         }
 
+        public OperationResult EditCampaign(int id,string name,string system, CampaignStatus status)
+        {
+            Campaign? foundCampaign = _dbContext.Campaigns.FirstOrDefault(c => c.Id == id);
+            if(foundCampaign == null)
+            {
+                OperationResult resultFail = new OperationResult(false, "Kampania o podanym id nie istnieje.");
+                return resultFail;
+            }
+            else
+            {
+                foundCampaign.Name = name;
+                foundCampaign.System = system;
+                foundCampaign.Status = status;
+                _dbContext.SaveChanges();
+                OperationResult resultSuccess = new OperationResult(true, "Poprawnie dokonano edycji kampani.");
+                return resultSuccess;
+            }
+        }
+
         public OperationResult DeleteCampaign(int id)
         {
             Campaign? foundCampaign = _dbContext.Campaigns.FirstOrDefault(c => c.Id == id);

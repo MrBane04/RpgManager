@@ -74,7 +74,7 @@ namespace RpgManager.Console
             {
                 var choiceCM = new SelectionPrompt<string>()
                 .Title("Campaign Menu")
-                .AddChoices("Wyświetl kampanie", "Edtytuj kampanie", "Usuń kampanie", "Powrót");
+                .AddChoices("Wyświetl kampanie", "Edytuj kampanie", "Usuń kampanie", "Powrót");
 
                 var selectedOptionCM = AnsiConsole.Prompt(choiceCM);
 
@@ -83,7 +83,11 @@ namespace RpgManager.Console
                     case "Wyświetl kampanie":
                         ShowCampaigns();
                         break;
-                    case "Edtytuj kampanie":
+                    case "Edytuj kampanie":
+                        ShowCampaigns();
+                        int id = AnsiConsole.Ask<int>("Podaj id kampanii do edycji: ");
+
+                        _campaignService.EditCampaign();
                         break;
                     case "Usuń kampanie":
                         DeleteCampaign();
@@ -94,6 +98,7 @@ namespace RpgManager.Console
                 }
             }
         }
+
         private void DeleteCampaign()
         {
             ShowCampaigns();
