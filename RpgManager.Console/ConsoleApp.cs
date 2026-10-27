@@ -17,6 +17,7 @@ namespace RpgManager.Console
             bool isRunning = true;
             while (isRunning)
             {
+                AnsiConsole.Clear();
                 var choice = new SelectionPrompt<string>()
                 .Title("RPG Manager - menu główne")
                 .AddChoices("Dodaj kampanię", "Moje kampanie","Sesja RPG", "Wyjście");
@@ -72,6 +73,7 @@ namespace RpgManager.Console
 
             while(isRunningCM)
             {
+                AnsiConsole.Clear();
                 var choiceCM = new SelectionPrompt<string>()
                 .Title("Campaign Menu")
                 .AddChoices("Wyświetl kampanie", "Edytuj kampanie", "Usuń kampanie", "Powrót");
@@ -82,6 +84,7 @@ namespace RpgManager.Console
                 {
                     case "Wyświetl kampanie":
                         ShowCampaigns();
+                        WaitForContinue();
                         break;
                     case "Edytuj kampanie":
                         ShowCampaigns();
@@ -106,6 +109,7 @@ namespace RpgManager.Console
                         {
                             AnsiConsole.MarkupLine($"[red]{result.Message}[/]");
                         }
+                        WaitForContinue();
                         break;
                     case "Usuń kampanie":
                         DeleteCampaign();
@@ -121,9 +125,17 @@ namespace RpgManager.Console
         {
             ShowCampaigns();
             int id = AnsiConsole.Ask<int>("Podaj id kampanii do usunięcia: ");
-            OperationResult result = _campaignService.DeleteCampaign(id);
-            AnsiConsole.WriteLine(result.Message);
-
+            bool confirm = AnsiConsole.Confirm("Czy na pewno chcesz usunąć tę kampanię? ");
+            if(confirm)
+            {
+                OperationResult result = _campaignService.DeleteCampaign(id);
+                AnsiConsole.WriteLine(result.Message);
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[yellow]Anulowano usuwanie kampanii[/]");
+            }
+            WaitForContinue();
         }
 
         private void ShowCampaigns()
@@ -139,6 +151,12 @@ namespace RpgManager.Console
                 table.AddRow(campaign.Id.ToString(),campaign.Name, campaign.System, campaign.Status.ToString());
             }
             AnsiConsole.Write(table);
+        }
+
+        private void WaitForContinue()
+        {
+            AnsiConsole.MarkupLine("[grey]Naciśnij dowolny klawisz, aby kontynuować...[/]");
+            System.Console.ReadKey(true);
         }
     }
 }
