@@ -24,8 +24,6 @@ namespace RpgManager.Console
 
                 var selectedOption = AnsiConsole.Prompt(choice);
 
-                AnsiConsole.MarkupLine($"Wybrano: [green]{selectedOption}[/]");
-
                 switch (selectedOption)
                 {
                     case "Dodaj kampanię":
@@ -56,14 +54,7 @@ namespace RpgManager.Console
                     .AddChoices("DND", "Jedyny Pierścień")
                 );
             OperationResult creatingCampaign = _campaignService.CreateCampaign(name, system, CampaignStatus.Aktywna);
-            if (creatingCampaign.Success)
-            {
-                AnsiConsole.MarkupLine($"[green]{creatingCampaign.Message}[/]");
-            }
-            else
-            {
-                AnsiConsole.MarkupLine($"[red]{creatingCampaign.Message}[/]");
-            }
+            ShowResult(creatingCampaign);
 
         }
 
@@ -75,7 +66,7 @@ namespace RpgManager.Console
             {
                 AnsiConsole.Clear();
                 var choiceCM = new SelectionPrompt<string>()
-                .Title("Campaign Menu")
+                .Title("Menu kampanii")
                 .AddChoices("Wyświetl kampanie", "Edytuj kampanie", "Usuń kampanie", "Powrót");
 
                 var selectedOptionCM = AnsiConsole.Prompt(choiceCM);
@@ -87,29 +78,7 @@ namespace RpgManager.Console
                         WaitForContinue();
                         break;
                     case "Edytuj kampanie":
-                        ShowCampaigns();
-                        int id = AnsiConsole.Ask<int>("Podaj id kampanii do edycji: ");
-                        string name = AnsiConsole.Ask<string>("Podaj nową nazwę kampanii: ");
-                        string system = AnsiConsole.Prompt(
-                            new SelectionPrompt<string>()
-                                .Title("Wybierz system RPG")
-                                .AddChoices("DND", "Jedyny Pierścień")
-                            );
-                        CampaignStatus status = AnsiConsole.Prompt(
-                            new SelectionPrompt<CampaignStatus>()
-                                .Title("Wybierz status kampanii")
-                                .AddChoices(CampaignStatus.Aktywna, CampaignStatus.Wygasła)
-                            );
-                        OperationResult result = _campaignService.EditCampaign(id,name,system,status);
-                        if(result.Success)
-                        {
-                            AnsiConsole.MarkupLine($"[green]{result.Message}[/]");
-                        }
-                        else
-                        {
-                            AnsiConsole.MarkupLine($"[red]{result.Message}[/]");
-                        }
-                        WaitForContinue();
+                        EditCampaign();
                         break;
                     case "Usuń kampanie":
                         DeleteCampaign();
@@ -138,25 +107,68 @@ namespace RpgManager.Console
             WaitForContinue();
         }
 
+        private void EditCampaign()
+        {
+            ShowCampaigns();
+            int id = AnsiConsole.Ask<int>("Podaj id kampanii do edycji: ");
+            string name = AnsiConsole.Ask<string>("Podaj nową nazwę kampanii: ");
+            string system = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Wybierz system RPG")
+                    .AddChoices("DND", "Jedyny Pierścień")
+                );
+            CampaignStatus status = AnsiConsole.Prompt(
+                new SelectionPrompt<CampaignStatus>()
+                    .Title("Wybierz status kampanii")
+                    .AddChoices(CampaignStatus.Aktywna, CampaignStatus.Wygasła)
+                );
+            OperationResult result = _campaignService.EditCampaign(id, name, system, status);
+            ShowResult(result);
+            WaitForContinue();
+        }
+
         private void ShowCampaigns()
         {
-            var table = new Table();
+            IReadOnlyList<Campaign> campaignList = _campaignService.GetCampaigns();
 
-            table.AddColumn("Id");
-            table.AddColumn("Nazwa kampanii");
-            table.AddColumn("System");
-            table.AddColumn("Status");
-            foreach (Campaign campaign in _campaignService.GetCampaigns())
+            if(campaignList.Any())
             {
-                table.AddRow(campaign.Id.ToString(),campaign.Name, campaign.System, campaign.Status.ToString());
+                var table = new Table()
+                    .BorderColor(Color.Grey)
+                    .Title("[bold yellow]Moje kampanie[/]");
+
+                table.AddColumn("[yellow]Id[/]", col => col.Centered());
+                table.AddColumn("[yellow]Nazwa kampanii[/]", col => col.Centered());
+                table.AddColumn("[yellow]System[/]", col => col.Centered());
+                table.AddColumn("[yellow]Status[/]", col => col.Centered());
+                foreach (Campaign campaign in campaignList)
+                {
+                    table.AddRow(campaign.Id.ToString(),campaign.Name, campaign.System, campaign.Status.ToString());
+                }
+                AnsiConsole.Write(table);
             }
-            AnsiConsole.Write(table);
+            else
+            {
+                AnsiConsole.MarkupLine("[red]Nie masz jeszcze żadnych kampanii[/]");
+            }
         }
 
         private void WaitForContinue()
         {
             AnsiConsole.MarkupLine("[grey]Naciśnij dowolny klawisz, aby kontynuować...[/]");
             System.Console.ReadKey(true);
+        }
+
+        private void ShowResult(OperationResult result)
+        {
+            if (result.Success)
+            {
+                AnsiConsole.MarkupLine($"[green]{result.Message}[/]");
+            }
+            else
+            {
+                AnsiConsole.MarkupLine($"[red]{result.Message}[/]");
+            }
         }
     }
 }
