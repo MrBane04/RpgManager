@@ -92,42 +92,67 @@ namespace RpgManager.Console
 
         private void DeleteCampaign()
         {
-            ShowCampaigns();
-            int id = AnsiConsole.Ask<int>("Podaj id kampanii do usunięcia: ");
-            bool confirm = AnsiConsole.Confirm("Czy na pewno chcesz usunąć tę kampanię? ");
-            if(confirm)
+            bool hasCampaigns = ShowCampaigns();
+            if(hasCampaigns)
             {
-                OperationResult result = _campaignService.DeleteCampaign(id);
-                AnsiConsole.WriteLine(result.Message);
+                int id = AnsiConsole.Ask<int>("Podaj id kampanii do usunięcia: ");
+                if(!_campaignService.GetCampaigns().Any(c=>c.Id==id))
+                {
+                    AnsiConsole.MarkupLine("[red]Nie znaleziono kampanii o podanym id[/]");
+                    return;
+                }
+                bool confirm = AnsiConsole.Confirm("Czy na pewno chcesz usunąć tę kampanię? ");
+                if (confirm)
+                {
+                    OperationResult result = _campaignService.DeleteCampaign(id);
+                    AnsiConsole.WriteLine(result.Message);
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[yellow]Anulowano usuwanie kampanii[/]");
+                }
+                WaitForContinue();
             }
-            else
-            {
-                AnsiConsole.MarkupLine("[yellow]Anulowano usuwanie kampanii[/]");
-            }
-            WaitForContinue();
         }
 
         private void EditCampaign()
         {
-            ShowCampaigns();
-            int id = AnsiConsole.Ask<int>("Podaj id kampanii do edycji: ");
-            string name = AnsiConsole.Ask<string>("Podaj nową nazwę kampanii: ");
-            string system = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("Wybierz system RPG")
-                    .AddChoices("DND", "Jedyny Pierścień")
-                );
-            CampaignStatus status = AnsiConsole.Prompt(
-                new SelectionPrompt<CampaignStatus>()
-                    .Title("Wybierz status kampanii")
-                    .AddChoices(CampaignStatus.Aktywna, CampaignStatus.Wygasła)
-                );
-            OperationResult result = _campaignService.EditCampaign(id, name, system, status);
-            ShowResult(result);
-            WaitForContinue();
+            bool hasCampaigns = ShowCampaigns();
+
+            if(hasCampaigns)
+            {
+                int id =0;
+                bool idFound = false;
+                while(!idFound)
+                {
+                    id = AnsiConsole.Ask<int>("Podaj id kampanii do edycji: ");
+                    idFound = _campaignService.GetCampaigns().Any(c => c.Id == id);
+
+                    if(!idFound)
+                    {
+                        AnsiConsole.MarkupLine("[red]Nie znaleziono kampanii o podanym id. Spróbuj ponownie.[/]");
+                    }
+
+                }
+                string name = AnsiConsole.Ask<string>("Podaj nową nazwę kampanii: ");
+                string system = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Wybierz system RPG")
+                        .AddChoices("DND", "Jedyny Pierścień")
+                    );
+                CampaignStatus status = AnsiConsole.Prompt(
+                    new SelectionPrompt<CampaignStatus>()
+                        .Title("Wybierz status kampanii")
+                        .AddChoices(CampaignStatus.Aktywna, CampaignStatus.Wygasła)
+                    );
+                OperationResult result = _campaignService.EditCampaign(id, name, system, status);
+                ShowResult(result);
+                WaitForContinue();
+            }
+
         }
 
-        private void ShowCampaigns()
+        private bool ShowCampaigns()
         {
             IReadOnlyList<Campaign> campaignList = _campaignService.GetCampaigns();
 
@@ -146,10 +171,12 @@ namespace RpgManager.Console
                     table.AddRow(campaign.Id.ToString(),campaign.Name, campaign.System, campaign.Status.ToString());
                 }
                 AnsiConsole.Write(table);
+                return true;
             }
             else
             {
                 AnsiConsole.MarkupLine("[red]Nie masz jeszcze żadnych kampanii[/]");
+                return false;
             }
         }
 
