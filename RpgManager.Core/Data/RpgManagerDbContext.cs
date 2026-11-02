@@ -15,22 +15,66 @@ namespace RpgManager.Core.Data
         {
             modelBuilder.Entity<Campaign>(entity =>
             {
-                modelBuilder.Entity<Campaign>().ToTable("campaigns");
-                modelBuilder.Entity<Campaign>()
-                    .Property(c => c.Name)
+                entity.ToTable("campaigns");
+
+                entity.Property(c => c.Name)
                     .HasColumnName("name");
-                modelBuilder.Entity<Campaign>()
-                    .Property(c => c.System)
+
+                entity.Property(c => c.System)
                     .HasColumnName("system");
+
                 entity.Property(c => c.Status)
                     .HasColumnName("status")
                     .HasConversion<string>();
-                modelBuilder.Entity<Campaign>()
-                    .Property(c => c.Id)
+
+                entity.Property(c => c.Id)
                     .HasColumnName("id");
 
             });
 
+            modelBuilder.Entity<Session>(entity => 
+            { 
+                entity.ToTable("sessions");
+
+                entity.HasOne(s => s.Campaign)
+                .WithMany(c => c.Sessions)
+                .HasForeignKey(s => s.CampaignId);
+
+                entity.Property(s => s.Id)
+                .HasColumnName("id");
+
+                entity.Property(s => s.CampaignId)
+                .HasColumnName("campaign_id");
+
+                entity.Property(s => s.Title)
+                .HasColumnName("title");
+
+                entity.Property(s => s.Description)
+                .HasColumnName("description");
+
+                entity.Property(s => s.SessionDate)
+                .HasColumnName("session_date");
+
+                entity.Property(s => s.DurationMinutes)
+                .HasColumnName("duration_minutes");
+
+                entity.Property(s => s.Status)
+                .HasColumnName("status")
+                .HasConversion(
+                    v => v.ToString().ToLowerInvariant(),
+                    v => Enum.Parse<SessionStatus>(v,true));
+
+                entity.Property(s => s.CreatedAt)
+                .HasColumnName("created_at")
+                .HasDefaultValueSql("NOW()");
+
+            });
+
         }
+
+        public DbSet<Session> Sessions { get; set; }
+
+        
+
     }
 }

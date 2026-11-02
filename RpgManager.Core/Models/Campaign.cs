@@ -4,6 +4,9 @@
     {
         private string _name = string.Empty;
         private string _system = string.Empty;
+
+        public ICollection<Session> Sessions { get; set; } = new List<Session>();
+
         public string Name { get => _name; 
             set 
             {
@@ -39,5 +42,7 @@
             this.System = system;
             this.Status = status;
         }
+
+        public Campaign() { }
     }
 }
