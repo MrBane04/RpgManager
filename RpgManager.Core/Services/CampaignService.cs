@@ -16,14 +16,22 @@ namespace RpgManager.Core.Services
         {
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(system) || !Enum.IsDefined(status))
             {
-                OperationResult resultFail = new OperationResult(false, "Name, system lub status jest niepoprawny.");
+                OperationResult resultFail = new OperationResult(false, "Nazwa, system lub status jest niepoprawna.");
                 return resultFail;
             }
             else
             {
                 Campaign campaign = new Campaign(name, system, status);
-                _dbContext.Campaigns.Add(campaign);
-                _dbContext.SaveChanges();
+                try
+                {
+                    _dbContext.Campaigns.Add(campaign);
+                    _dbContext.SaveChanges();
+                }
+                catch(DbUpdateException)
+                {
+                    
+                    return new OperationResult(false, "Nie udało się zapisać kampanii. Spróbuj ponownie");
+                }
                 OperationResult resultSuccess = new OperationResult(true, "Sukces");
                 return resultSuccess;
             }
@@ -49,11 +57,19 @@ namespace RpgManager.Core.Services
             }
             else
             {
-                foundCampaign.Name = name;
-                foundCampaign.System = system;
-                foundCampaign.Status = status;
-                _dbContext.SaveChanges();
-                OperationResult resultSuccess = new OperationResult(true, "Poprawnie dokonano edycji kampani.");
+                try
+                {
+                    foundCampaign.Name = name;
+                    foundCampaign.System = system;
+                    foundCampaign.Status = status;
+                    _dbContext.SaveChanges();
+
+                }
+                catch(DbUpdateException)
+                {
+                    return new OperationResult(false, "Nie udało się zaktualizować kampanii.");
+                }
+                OperationResult resultSuccess = new OperationResult(true, "Poprawnie dokonano edycji kampanii.");
                 return resultSuccess;
             }
         }
@@ -63,8 +79,16 @@ namespace RpgManager.Core.Services
             Campaign? foundCampaign = _dbContext.Campaigns.FirstOrDefault(c => c.Id == id);
             if(foundCampaign != null)
             {
-                _dbContext.Campaigns.Remove(foundCampaign);
-                _dbContext.SaveChanges();
+                try
+                {
+                    _dbContext.Campaigns.Remove(foundCampaign);
+                    _dbContext.SaveChanges();
+                }
+                catch(DbUpdateException)
+                {
+                    return new OperationResult(false, "Nie udało się usunąć kampanii.");
+                }
+                
                 OperationResult resultSuccess = new OperationResult(true,"Poprawnie usunięto kampanię.");
                 return resultSuccess;
             }
@@ -73,6 +97,11 @@ namespace RpgManager.Core.Services
                 OperationResult resultFailed = new OperationResult(false, "Operacja usunięcia kampani się nie powiodła, nie znaleziono kampanii o podanym ID");
                 return resultFailed;
             }
+        }
+
+        public bool CampaignExists (int id)
+        {
+            return _dbContext.Campaigns.Any(c => c.Id == id);
         }
     }
 }

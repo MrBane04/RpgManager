@@ -47,7 +47,12 @@ namespace RpgManager.Console
 
         private void AddCampaign()
         {
-            var name = AnsiConsole.Ask<string>("Podaj nazwę kampanii");
+            var name = AnsiConsole.Prompt(
+                new TextPrompt<string>("Podaj nazwę kampanii")
+                .Validate(
+                    input => !string.IsNullOrWhiteSpace(input),
+                    "Podaj poprawną nazwę kampanii !")
+                );
             var system = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("Wybierz system RPG")
@@ -95,11 +100,18 @@ namespace RpgManager.Console
             bool hasCampaigns = ShowCampaigns();
             if(hasCampaigns)
             {
-                int id = AnsiConsole.Ask<int>("Podaj id kampanii do usunięcia: ");
-                if(!_campaignService.GetCampaigns().Any(c=>c.Id==id))
+                int id=0;
+                bool idFound = false;
+
+                while(!idFound)
                 {
-                    AnsiConsole.MarkupLine("[red]Nie znaleziono kampanii o podanym id[/]");
-                    return;
+                    id = AnsiConsole.Ask<int>("Podaj id kampanii do usunięcia: ");
+                    idFound = _campaignService.CampaignExists(id);
+
+                    if(!idFound)
+                    {
+                        AnsiConsole.MarkupLine("[red]Nie znaleziono kampanii o podanym id[/]");
+                    }
                 }
                 bool confirm = AnsiConsole.Confirm("Czy na pewno chcesz usunąć tę kampanię? ");
                 if (confirm)
@@ -126,7 +138,7 @@ namespace RpgManager.Console
                 while(!idFound)
                 {
                     id = AnsiConsole.Ask<int>("Podaj id kampanii do edycji: ");
-                    idFound = _campaignService.GetCampaigns().Any(c => c.Id == id);
+                    idFound = _campaignService.CampaignExists(id);
 
                     if(!idFound)
                     {
@@ -134,7 +146,10 @@ namespace RpgManager.Console
                     }
 
                 }
-                string name = AnsiConsole.Ask<string>("Podaj nową nazwę kampanii: ");
+                var name = AnsiConsole.Prompt(
+                    new TextPrompt<string>("Podaj nazwę kampanii")
+                    .Validate(input => !string.IsNullOrWhiteSpace(input),
+                    "Podaj poprawną nazwę kampanii ! "));
                 string system = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title("Wybierz system RPG")
