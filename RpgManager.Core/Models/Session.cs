@@ -12,7 +12,7 @@ public class Session
         get => _durationMinutes;
         set
         {
-            if (value.HasValue && value <= 0)
+            if (value.HasValue && value.Value <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(DurationMinutes),"Czas trwania musi być większy od zera.");
             }
@@ -42,6 +42,20 @@ public class Session
     public int CampaignId { get; set; }
 
     public Campaign Campaign { get; set; } = null!;
+
+    public Session(int campaignId,string title,string? description,DateTime sessionDate,int? durationMinutes,SessionStatus status)
+    {
+        this.CampaignId = campaignId;
+        this.Title = title;
+        this.Description = description;
+        this.SessionDate = sessionDate;
+        this.DurationMinutes = durationMinutes;
+        this.Status = status;
+    }
+
+    public Session()
+    {
+    }
 }
     
     

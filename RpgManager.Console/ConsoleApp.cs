@@ -7,9 +7,11 @@ namespace RpgManager.Console
     internal class ConsoleApp
     {
         private readonly CampaignService _campaignService;
-        public ConsoleApp(CampaignService campaignService)
+        private readonly SessionService _sessionService;
+        public ConsoleApp(CampaignService campaignService, SessionService sessionService)
         {
             _campaignService = campaignService;
+            _sessionService = sessionService;
         }
 
         public void Run()
@@ -33,7 +35,7 @@ namespace RpgManager.Console
                         CampaignMenu();
                         break;
                     case "Sesja RPG":
-                        AnsiConsole.MarkupLine("Wybrano sesje");
+                        SessionMenu();
                         break;
                     case "Wyjście":
                         AnsiConsole.MarkupLine("Wybrano wyjście");
@@ -43,6 +45,30 @@ namespace RpgManager.Console
                         break;
                 }
             }
+        }
+
+        private void SessionMenu()
+        {
+            IReadOnlyList<Campaign> campaignList = _campaignService.GetCampaigns();
+
+            if(!campaignList.Any())
+            {
+                AnsiConsole.MarkupLine("[red]Lista kampanii jest pusta.[/]");
+                WaitForContinue();
+                return;
+            }  
+            var selectedCampaign = AnsiConsole.Prompt(  
+                new SelectionPrompt<Campaign>() 
+                .Title("Wybierz kampanię")
+                .UseConverter(c => $"{c.Name} ({c.System})")   
+                .AddChoices(campaignList));
+
+            AnsiConsole.MarkupLine($"Wybrano kampanię: [yellow]{selectedCampaign.Name}[/]");
+            AnsiConsole.MarkupLine($"ID kampanii: {selectedCampaign.Id}");
+
+            WaitForContinue();
+
+
         }
 
         private void AddCampaign()
