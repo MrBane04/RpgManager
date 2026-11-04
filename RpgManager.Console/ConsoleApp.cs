@@ -1,6 +1,9 @@
 ﻿using RpgManager.Core.Models;
 using RpgManager.Core.Services;
 using Spectre.Console;
+using System.Net.NetworkInformation;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace RpgManager.Console
 {
@@ -63,13 +66,301 @@ namespace RpgManager.Console
                 .UseConverter(c => $"{c.Name} ({c.System})")   
                 .AddChoices(campaignList));
 
-            AnsiConsole.MarkupLine($"Wybrano kampanię: [yellow]{selectedCampaign.Name}[/]");
-            AnsiConsole.MarkupLine($"ID kampanii: {selectedCampaign.Id}");
-
-            WaitForContinue();
+            SessionOperationsMenu(selectedCampaign.Id);
 
 
         }
+
+        private void SessionOperationsMenu(int campaignId)
+        {
+            bool isRunning = true;
+
+            while (isRunning)
+            {
+                AnsiConsole.Clear();
+
+                var choice = new SelectionPrompt<string>()
+                    .Title("Menu sesji RPG")
+                    .AddChoices(
+                        "Wyświetl sesje",
+                        "Dodaj sesję",
+                        "Edytuj sesję",
+                        "Usuń sesję",
+                        "Powrót"
+                    );
+
+                var selectedOption = AnsiConsole.Prompt(choice);
+
+                switch (selectedOption)
+                {
+                    case "Wyświetl sesje":
+                        ShowSessions(campaignId);
+                        break;
+                    case "Dodaj sesję":
+                        AddSession(campaignId);
+                        break;
+                    case "Edytuj sesję":
+                        EditSession(campaignId);
+                        break;
+                    case "Usuń sesję":
+                        DeleteSession(campaignId);
+                        break;
+                    case "Powrót":
+                        isRunning = false;
+                        break;
+                }
+            }
+        }
+
+        private void ShowSessions(int campaignId)
+        {
+            IReadOnlyList<Session> sessionsList = _sessionService.GetSessions(campaignId);
+            if(sessionsList.Any())
+            {
+                var table = new Table()
+                    .BorderColor(Color.Grey)
+                    .Title("[bold yellow]Sesje RPG[/]");
+
+                table.AddColumn("[yellow]Id[/]", col => col.Centered());
+                table.AddColumn("[yellow]Tytuł sesji[/]", col => col.Centered());
+                table.AddColumn("[yellow]Data sesji[/]", col => col.Centered());
+                table.AddColumn("[yellow]czas trwania(min)[/]", col => col.Centered());
+                table.AddColumn("[yellow]Status(min)[/]", col => col.Centered());
+                foreach (Session session in sessionsList)
+                {
+                    table.AddRow(
+                        session.Id.ToString(),
+                        session.Title,
+                        session.SessionDate.ToString("dd.MM.yyyy HH:mm"),
+                        session.DurationMinutes?.ToString() ?? "Nie podano",
+                        session.Status.ToString());
+                }
+                AnsiConsole.Write(table);
+            }
+            else
+            {
+                AnsiConsole.WriteLine("Nie ma żadnej kampanii");
+            }
+
+        }
+
+        private void AddSession(int campaignId)
+        {
+            var title = AnsiConsole.Prompt(
+                new TextPrompt<string>("Podaj nazwę sesji")
+                .Validate(
+                    input => !string.IsNullOrWhiteSpace(input),
+                    "Podaj poprawną nazwę sesji !")
+                );
+            var description = AnsiConsole.Prompt(
+                new TextPrompt<string>("Podaj opis sesji (opcjonalnie)")
+                .AllowEmpty());
+
+            DateTime sessionDate;
+
+            while (true)
+            {
+                var dateInput = AnsiConsole.Prompt(
+                    new TextPrompt<string>("Podaj datę i godzinę sesji (dd.MM.yyyy HH:mm)"));
+
+                if (DateTime.TryParseExact(
+                    dateInput,
+                    "dd.MM.yyyy HH:mm",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out sessionDate))
+                {
+                    break;
+                }
+
+                AnsiConsole.MarkupLine("[red]Niepoprawny format daty![/]");
+
+            }
+            int? durationTime;
+
+            while(true)
+            {
+
+                var durationInput = AnsiConsole.Prompt(
+                    new TextPrompt<string>("Podaj czas trwania sesji w minutach (opcjonalne)").AllowEmpty());
+
+                if(string.IsNullOrWhiteSpace(durationInput))
+                {
+                    durationTime = null;
+                    break;
+                }
+                else if(int.TryParse(durationInput, out int parsedDuration) && parsedDuration>0)
+                {
+                    durationTime = parsedDuration;
+                    break;
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[red]Podaj poprawną liczbę większą od zera![/]");
+                }
+            }
+
+            SessionStatus status = AnsiConsole.Prompt(
+                new SelectionPrompt<SessionStatus>()
+                .Title("Wybierz status sesji")
+                .AddChoices(
+                    SessionStatus.Planned,
+                    SessionStatus.Completed,
+                    SessionStatus.Canceled));
+
+            OperationResult creatingSession = _sessionService.CreateSession(campaignId,title,
+                description,sessionDate,
+                durationTime,status);
+            ShowResult(creatingSession);
+        }
+
+        private void EditSession(int campaignId)
+        {
+            IReadOnlyList<Session> sessionsList = _sessionService.GetSessions(campaignId);
+
+            if (!sessionsList.Any())
+            {
+                AnsiConsole.MarkupLine("[red]Nie ma żadnych sesji do edycji.[/]");
+                WaitForContinue();
+                return;
+            }
+
+            var selectedSession = AnsiConsole.Prompt(
+                new SelectionPrompt<Session>()
+                    .Title("Wybierz sesję do edycji")
+                    .UseConverter(s => $"{s.Id} - {s.Title} ({s.SessionDate:dd.MM.yyyy HH:mm})")
+                    .AddChoices(sessionsList)
+            );
+
+            var title = AnsiConsole.Prompt(
+                new TextPrompt<string>("Podaj nowy tytuł sesji")
+                    .Validate(
+                        input => !string.IsNullOrWhiteSpace(input),
+                        "Tytuł sesji nie może być pusty!"
+                    )
+            );
+
+            var description = AnsiConsole.Prompt(
+                new TextPrompt<string>("Podaj nowy opis sesji (opcjonalnie)")
+                    .AllowEmpty()
+            );
+
+            DateTime sessionDate;
+
+            while (true)
+            {
+                var dateInput = AnsiConsole.Prompt(
+                    new TextPrompt<string>("Podaj nową datę i godzinę (dd.MM.yyyy HH:mm)")
+                );
+
+                if (DateTime.TryParseExact(
+                    dateInput,
+                    "dd.MM.yyyy HH:mm",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out sessionDate))
+                {
+                    break;
+                }
+
+                AnsiConsole.MarkupLine("[red]Niepoprawny format daty![/]");
+            }
+
+            int? durationTime;
+
+            while (true)
+            {
+                var durationInput = AnsiConsole.Prompt(
+                    new TextPrompt<string>("Podaj nowy czas trwania w minutach (opcjonalnie)")
+                        .AllowEmpty()
+                );
+
+                if (string.IsNullOrWhiteSpace(durationInput))
+                {
+                    durationTime = null;
+                    break;
+                }
+                else if (int.TryParse(durationInput, out int parsedDuration) && parsedDuration > 0)
+                {
+                    durationTime = parsedDuration;
+                    break;
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[red]Podaj poprawną liczbę większą od zera![/]");
+                }
+            }
+
+            SessionStatus status = AnsiConsole.Prompt(
+                new SelectionPrompt<SessionStatus>()
+                    .Title("Wybierz nowy status sesji")
+                    .AddChoices(
+                        SessionStatus.Planned,
+                        SessionStatus.Completed,
+                        SessionStatus.Canceled
+                    )
+            );
+
+            bool confirm = AnsiConsole.Confirm(
+                $"Czy na pewno chcesz zapisać zmiany w sesji [yellow]{selectedSession.Title}[/]?");
+
+            if (confirm)
+            {
+                OperationResult result = _sessionService.EditSession(
+                    campaignId,
+                    selectedSession.Id,
+                    durationTime,
+                    title,
+                    description,
+                    sessionDate,
+                    status
+                );
+
+                ShowResult(result);
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[yellow]Anulowano edycję sesji.[/]");
+            }
+
+            WaitForContinue();
+        }
+
+        private void DeleteSession(int campaignId)
+        {
+            IReadOnlyList<Session> sessionsList = _sessionService.GetSessions(campaignId);
+
+            if (!sessionsList.Any())
+            {
+                AnsiConsole.MarkupLine("[red]Nie ma żadnych sesji do usunięcia.[/]");
+                WaitForContinue();
+                return;
+            }
+
+            var selectedSession = AnsiConsole.Prompt(
+                new SelectionPrompt<Session>()
+                    .Title("Wybierz sesję do usunięcia")
+                    .UseConverter(s => $"{s.Id} - {s.Title} ({s.SessionDate:dd.MM.yyyy HH:mm})")
+                    .AddChoices(sessionsList)
+            );
+
+            bool confirm = AnsiConsole.Confirm(
+                $"Czy na pewno chcesz usunąć sesję [yellow]{selectedSession.Title}[/]?");
+
+            if (confirm)
+            {
+                OperationResult result = _sessionService.DeleteSession(campaignId, selectedSession.Id);
+                ShowResult(result);
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[yellow]Anulowano usuwanie sesji.[/]");
+            }
+
+            WaitForContinue();
+        }
+
+
 
         private void AddCampaign()
         {
