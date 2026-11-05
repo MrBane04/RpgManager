@@ -6,6 +6,7 @@
         private string _system = string.Empty;
 
         public ICollection<Session> Sessions { get; set; } = new List<Session>();
+        public ICollection<Character> Characters { get; set; } = new List<Character>();
 
         public string Name { get => _name; 
             set 
