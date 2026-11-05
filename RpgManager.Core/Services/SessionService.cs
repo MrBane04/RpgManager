@@ -48,7 +48,13 @@ namespace RpgManager.Core.Services
         {
             return _dbContext.Sessions
                 .Where(s => s.CampaignId == campaignId)
+                .OrderByDescending( s => s.SessionDate)
                 .ToList();
+        }
+
+        public Session? GetSession(int campaignId, int sessionId)
+        {
+            return _dbContext.Sessions.FirstOrDefault(s => s.Id == sessionId && s.CampaignId == campaignId);
         }
 
         public OperationResult DeleteSession(int campaignId, int sessionId)
