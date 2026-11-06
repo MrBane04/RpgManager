@@ -2,8 +2,8 @@
 {
     public class CreateCampaignRequest
     {
-        public string Name { get; set; }
-        public string System { get; set; }
-        public string Status { get; set; }
+        public required string Name { get; set; }
+        public required string System { get; set; }
+        public required string Status { get; set; }
     }
 }

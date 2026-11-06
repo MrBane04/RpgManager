@@ -10,3 +10,5 @@ CREATE TABLE sessions
 	created_at timestamptz NOT NULL DEFAULT now(),
 	CONSTRAINT fk_session_campaign FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
 )
+
+

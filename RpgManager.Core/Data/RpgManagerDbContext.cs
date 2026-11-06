@@ -13,6 +13,47 @@ namespace RpgManager.Core.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<Character>(entity =>
+            {
+                entity.ToTable("characters");
+
+                entity.HasOne(s => s.Campaign)
+                .WithMany(c => c.Characters)
+                .HasForeignKey(s => s.CampaignId);
+
+                entity.Property(s => s.Id)
+                .HasColumnName("id");
+
+                entity.Property(s => s.CampaignId)
+                .HasColumnName("campaign_id");
+
+                entity.Property(s => s.Name)
+                .HasColumnName("name");
+
+                entity.Property(s => s.Age)
+                .HasColumnName("age");
+
+                entity.Property(s => s.Race)
+                .HasColumnName("race");
+
+                entity.Property(s => s.CharacterClass)
+                .HasColumnName("character_class");
+
+                entity.Property(s => s.Level)
+                .HasColumnName("level");
+
+
+
+                entity.Property(s => s.Description)
+                .HasColumnName("description");
+
+                entity.Property(s => s.CreatedAt)
+                .HasColumnName("created_at")
+                .HasDefaultValueSql("NOW()");
+            }
+            );
+
             modelBuilder.Entity<Campaign>(entity =>
             {
                 entity.ToTable("campaigns");
@@ -74,7 +115,9 @@ namespace RpgManager.Core.Data
 
         public DbSet<Session> Sessions { get; set; }
 
-        
+        public DbSet<Character> Characters { get; set; }
+
+
 
     }
 }
