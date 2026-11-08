@@ -18,8 +18,10 @@ using var dbContext = new RpgManagerDbContext(options);
 
 CampaignService campaignService = new CampaignService(dbContext);
 SessionService sessionService = new SessionService(dbContext);
+CharacterService characterService = new CharacterService(dbContext);
+NoteService noteService = new NoteService(dbContext);
 
-ConsoleApp consoleApp = new ConsoleApp(campaignService,sessionService);
+ConsoleApp consoleApp = new ConsoleApp(campaignService,sessionService,characterService,noteService);
 
 consoleApp.Run();
 

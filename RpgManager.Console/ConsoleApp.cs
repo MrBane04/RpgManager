@@ -11,10 +11,14 @@ namespace RpgManager.Console
     {
         private readonly CampaignService _campaignService;
         private readonly SessionService _sessionService;
-        public ConsoleApp(CampaignService campaignService, SessionService sessionService)
+        private readonly CharacterService _characterService;
+        private readonly NoteService _noteService;
+        public ConsoleApp(CampaignService campaignService, SessionService sessionService, CharacterService characterService, NoteService noteService)
         {
             _campaignService = campaignService;
             _sessionService = sessionService;
+            _characterService = characterService;
+            _noteService = noteService;
         }
 
         public void Run()
@@ -25,7 +29,7 @@ namespace RpgManager.Console
                 AnsiConsole.Clear();
                 var choice = new SelectionPrompt<string>()
                 .Title("RPG Manager - menu główne")
-                .AddChoices("Dodaj kampanię", "Moje kampanie","Sesja RPG", "Wyjście");
+                .AddChoices("Dodaj kampanię", "Moje kampanie","Sesja RPG", "Postacie RPG", "Wyjście");
 
                 var selectedOption = AnsiConsole.Prompt(choice);
 
@@ -40,6 +44,9 @@ namespace RpgManager.Console
                     case "Sesja RPG":
                         SessionMenu();
                         break;
+                    case "Postacie RPG":
+                        CharacterMenu();
+                        break;
                     case "Wyjście":
                         AnsiConsole.MarkupLine("Wybrano wyjście");
                         isRunning = false;
@@ -48,6 +55,273 @@ namespace RpgManager.Console
                         break;
                 }
             }
+        }
+
+        public void CharacterMenu()
+        {
+            IReadOnlyList<Campaign> campaignList = _campaignService.GetCampaigns();
+
+            if (!campaignList.Any())
+            {
+                AnsiConsole.MarkupLine("[red]Nie ma jeszcze żadnych kampanii.[/]");
+                WaitForContinue();
+                return;
+            }
+            var selectedCampaign = AnsiConsole.Prompt(
+                new SelectionPrompt<Campaign>()
+                .Title("Wybierz kampanię")
+                .UseConverter(c => $"{c.Name} ({c.System})")
+                .AddChoices(campaignList));
+
+            CharacterOperationsMenu(selectedCampaign.Id);
+        }
+
+        public void CharacterOperationsMenu(int campaignId)
+        {
+            bool isRunning = true;
+
+            while (isRunning)
+            {
+                AnsiConsole.Clear();
+
+                var choice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Zarządzanie postaciami")
+                        .AddChoices(
+                            "Wyświetl postacie",
+                            "Szczegóły postaci",
+                            "Dodaj postać",
+                            "Edytuj postać",
+                            "Usuń postać",
+                            "Powrót"));
+
+                switch (choice)
+                {
+                    case "Wyświetl postacie":
+                        ShowCharacters(campaignId);
+                        break;
+                    case "Szczegóły postaci":
+                        SelectCharacterForDetails(campaignId);
+                        break;
+                    case "Dodaj postać":
+                        AddCharacter(campaignId);
+                        break;
+                    case "Edytuj postać":
+                        EditCharacter(campaignId);
+                        break;
+                    case "Usuń postać":
+                        DeleteCharacter(campaignId);
+                        break;
+                    case "Powrót":
+                        isRunning = false;
+                        break;
+                }
+            }
+        }
+
+        public void ShowCharacters(int campaignId)
+        {
+            IReadOnlyList<Character> characters = _characterService.GetCharacters(campaignId);
+
+            if (!characters.Any())
+            {
+                AnsiConsole.MarkupLine("[yellow]Ta kampania nie ma jeszcze żadnych postaci.[/]");
+                WaitForContinue();
+                return;
+            }
+
+            var table = new Table();
+            table.AddColumn("ID");
+            table.AddColumn("Imię");
+            table.AddColumn("Wiek");
+            table.AddColumn("Rasa");
+            table.AddColumn("Klasa");
+            table.AddColumn("Poziom");
+
+            foreach (var character in characters)
+            {
+                table.AddRow(
+                    character.Id.ToString(),
+                    character.Name,
+                    character.Age.ToString(),
+                    character.Race ?? "-",
+                    character.CharacterClass ?? "-",
+                    character.Level.ToString()
+                );
+            }
+
+            AnsiConsole.Write(table);
+            WaitForContinue();
+        }
+
+        public void SelectCharacterForDetails(int campaignId)
+        {
+            IReadOnlyList<Character> characters = _characterService.GetCharacters(campaignId);
+
+            if (!characters.Any())
+            {
+                AnsiConsole.MarkupLine("[yellow]Brak postaci do wyświetlenia.[/]");
+                WaitForContinue();
+                return;
+            }
+
+            var selectedCharacter = AnsiConsole.Prompt(
+                new SelectionPrompt<Character>()
+                    .Title("Wybierz postać")
+                    .UseConverter(c => $"{c.Name} (ID: {c.Id})")
+                    .AddChoices(characters));
+
+            ShowCharacterDetails(campaignId, selectedCharacter.Id);
+        }
+
+        public void ShowCharacterDetails(int campaignId, int characterId)
+        {
+            Character? character = _characterService.GetCharacter(campaignId, characterId);
+
+            if (character == null)
+            {
+                AnsiConsole.MarkupLine("[red]Nie znaleziono postaci.[/]");
+                WaitForContinue();
+                return;
+            }
+
+            var panel = new Panel(
+                $"[bold]Imię:[/] {Markup.Escape(character.Name)}\n" +
+                $"[bold]Wiek:[/] {character.Age}\n" +
+                $"[bold]Rasa:[/] {Markup.Escape(character.Race ?? "-")}\n" +
+                $"[bold]Klasa:[/] {Markup.Escape(character.CharacterClass ?? "-")}\n" +
+                $"[bold]Poziom:[/] {character.Level}\n" +
+                $"[bold]Opis:[/] {Markup.Escape(character.Description ?? "Brak opisu")}\n" +
+                $"[bold]Utworzono:[/] {character.CreatedAt.ToLocalTime():dd.MM.yyyy HH:mm}"
+            );
+
+            panel.Header = new PanelHeader($"Postać: {character.Name}");
+            panel.Border = BoxBorder.Rounded;
+
+            AnsiConsole.Write(panel);
+            WaitForContinue();
+        }
+
+        public void AddCharacter(int campaignId)
+        {
+            AnsiConsole.MarkupLine("[bold]Dodawanie nowej postaci[/]");
+
+            string name = AnsiConsole.Ask<string>("Imię postaci:");
+            int age = AnsiConsole.Ask<int>("Wiek:");
+            string? race = AnsiConsole.Ask<string>("Rasa (opcjonalnie):");
+            string? characterClass = AnsiConsole.Ask<string>("Klasa (opcjonalnie):");
+            int level = AnsiConsole.Ask<int>("Poziom:");
+            string? description = AnsiConsole.Ask<string>("Opis (opcjonalnie):");
+
+            race = string.IsNullOrWhiteSpace(race) ? null : race;
+            characterClass = string.IsNullOrWhiteSpace(characterClass) ? null : characterClass;
+            description = string.IsNullOrWhiteSpace(description) ? null : description;
+
+            OperationResult result = _characterService.CreateCharacter(
+                campaignId, name, age, race, characterClass, level, description);
+
+            ShowResult(result);
+            WaitForContinue();
+        }
+
+        public void EditCharacter(int campaignId)
+        {
+            IReadOnlyList<Character> characters = _characterService.GetCharacters(campaignId);
+
+            if (!characters.Any())
+            {
+                AnsiConsole.MarkupLine("[yellow]Brak postaci do edycji.[/]");
+                WaitForContinue();
+                return;
+            }
+
+            var selectedCharacter = AnsiConsole.Prompt(
+                new SelectionPrompt<Character>()
+                    .Title("Wybierz postać do edycji")
+                    .UseConverter(c => $"{c.Name} (ID: {c.Id})")
+                    .AddChoices(characters));
+
+            string name = AnsiConsole.Prompt(
+                new TextPrompt<string>("Nowe imię:")
+                    .DefaultValue(selectedCharacter.Name));
+
+            int age = AnsiConsole.Prompt(
+                new TextPrompt<int>("Nowy wiek:")
+                    .DefaultValue(selectedCharacter.Age));
+
+            string? race = AnsiConsole.Prompt(
+                new TextPrompt<string>("Nowa rasa:")
+                    .DefaultValue(selectedCharacter.Race ?? ""));
+
+            string? characterClass = AnsiConsole.Prompt(
+                new TextPrompt<string>("Nowa klasa:")
+                    .DefaultValue(selectedCharacter.CharacterClass ?? ""));
+
+            int level = AnsiConsole.Prompt(
+                new TextPrompt<int>("Nowy poziom:")
+                    .DefaultValue(selectedCharacter.Level));
+
+            string? description = AnsiConsole.Prompt(
+                new TextPrompt<string>("Nowy opis:")
+                    .DefaultValue(selectedCharacter.Description ?? ""));
+
+            race = string.IsNullOrWhiteSpace(race) ? null : race;
+            characterClass = string.IsNullOrWhiteSpace(characterClass) ? null : characterClass;
+            description = string.IsNullOrWhiteSpace(description) ? null : description;
+
+            bool confirm = AnsiConsole.Confirm(
+    $"Czy na pewno chcesz zapisać zmiany w postaci [yellow]{Markup.Escape(selectedCharacter.Name)}[/]?");
+
+            if (confirm)
+            {
+                OperationResult result = _characterService.EditCharacter(
+                    campaignId,selectedCharacter.Id,
+                    name,age,
+                    race,characterClass,
+                    level,description);
+
+                ShowResult(result);
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[yellow]Anulowano edycję postaci.[/]");
+            }
+
+            WaitForContinue();
+        }
+
+        public void DeleteCharacter(int campaignId)
+        {
+            IReadOnlyList<Character> characters = _characterService.GetCharacters(campaignId);
+
+            if (!characters.Any())
+            {
+                AnsiConsole.MarkupLine("[yellow]Brak postaci do usunięcia.[/]");
+                WaitForContinue();
+                return;
+            }
+
+            var selectedCharacter = AnsiConsole.Prompt(
+                new SelectionPrompt<Character>()
+                    .Title("Wybierz postać do usunięcia")
+                    .UseConverter(c => $"{c.Name} (ID: {c.Id})")
+                    .AddChoices(characters));
+
+            bool confirmation = AnsiConsole.Confirm(
+                $"Czy na pewno chcesz usunąć postać [red]{Markup.Escape(selectedCharacter.Name)}[/]?");
+
+            if (!confirmation)
+            {
+                AnsiConsole.MarkupLine("[yellow]Anulowano usuwanie.[/]");
+                WaitForContinue();
+                return;
+            }
+
+            OperationResult result = _characterService.DeleteCharacter(
+                campaignId, selectedCharacter.Id);
+
+            ShowResult(result);
+            WaitForContinue();
         }
 
         private void SessionMenu()
@@ -435,7 +709,7 @@ namespace RpgManager.Console
                 AnsiConsole.Clear();
                 var choiceCM = new SelectionPrompt<string>()
                 .Title("Menu kampanii")
-                .AddChoices("Wyświetl kampanie", "Edytuj kampanie", "Usuń kampanie", "Powrót");
+                .AddChoices("Wyświetl kampanie", "Edytuj kampanie", "Usuń kampanie","Notatka kampanii", "Powrót");
 
                 var selectedOptionCM = AnsiConsole.Prompt(choiceCM);
 
@@ -451,11 +725,66 @@ namespace RpgManager.Console
                     case "Usuń kampanie":
                         DeleteCampaign();
                         break;
+                    case "Notatka kampanii":
+                        SelectCampaignForNote();
+                        break;
                     case "Powrót":
                         isRunningCM = false;
                         break;
                 }
             }
+        }
+
+        private void SelectCampaignForNote()
+        {
+            IReadOnlyList<Campaign> campaignList = _campaignService.GetCampaigns();
+
+            if (!campaignList.Any())
+            {
+                AnsiConsole.MarkupLine("[red]Nie ma jeszcze żadnych kampanii.[/]");
+                WaitForContinue();
+                return;
+            }
+
+            var selectedCampaign = AnsiConsole.Prompt(
+                new SelectionPrompt<Campaign>()
+                    .Title("Wybierz kampanię, której notatkę chcesz otworzyć")
+                    .UseConverter(c => $"{c.Name} ({c.System})")
+                    .AddChoices(campaignList));
+
+            OpenCampaignNote(selectedCampaign.Id);
+        }
+
+        private void OpenCampaignNote(int campaignId)
+        {
+            Note? note = _noteService.GetNote(campaignId);
+
+            if (note == null)
+            {
+                AnsiConsole.MarkupLine("[red]Nie znaleziono notatki dla tej kampanii.[/]");
+                WaitForContinue();
+                return;
+            }
+
+            AnsiConsole.Clear();
+
+            AnsiConsole.MarkupLine("[bold yellow]Notatka kampanii[/]");
+            AnsiConsole.MarkupLine($"[grey]Ostatnia edycja: {note.UpdatedAt.ToLocalTime():dd.MM.yyyy HH:mm}[/]");
+            AnsiConsole.WriteLine();
+
+            NoteEditor editor = new NoteEditor(note.Content);
+            string? updatedContent = editor.Edit();
+            if(updatedContent != null )
+            {
+                OperationResult result = _noteService.UpdateNote(campaignId, updatedContent);
+                ShowResult(result);
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[yellow]Anulowano edycję notatki.[/]");
+            }
+            
+            WaitForContinue();
         }
 
         private void DeleteCampaign()

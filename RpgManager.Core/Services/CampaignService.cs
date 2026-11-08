@@ -22,6 +22,7 @@ namespace RpgManager.Core.Services
             else
             {
                 Campaign campaign = new Campaign(name, system, status);
+                campaign.Note = new Note();
                 try
                 {
                     _dbContext.Campaigns.Add(campaign);

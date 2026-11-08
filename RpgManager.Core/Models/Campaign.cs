@@ -5,6 +5,8 @@
         private string _name = string.Empty;
         private string _system = string.Empty;
 
+        public Note Note { get; set; } = null!;
+
         public ICollection<Session> Sessions { get; set; } = new List<Session>();
         public ICollection<Character> Characters { get; set; } = new List<Character>();
 

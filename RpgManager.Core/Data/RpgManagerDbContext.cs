@@ -5,6 +5,8 @@ namespace RpgManager.Core.Data
     public class RpgManagerDbContext : DbContext 
     {
 
+        public DbSet<Note> Notes { get; set; }
+
         public DbSet<Campaign> Campaigns { get; set; }
         public RpgManagerDbContext(DbContextOptions<RpgManagerDbContext> options) : base(options)
         {
@@ -16,6 +18,27 @@ namespace RpgManager.Core.Data
 
             modelBuilder.Entity<Character>(entity =>
             {
+                modelBuilder.Entity<Note>(entity =>
+                {
+                    entity.ToTable("notes");
+
+                    entity.HasOne(n => n.Campaign)
+                        .WithOne(c => c.Note)
+                        .HasForeignKey<Note>(n => n.CampaignId);
+
+                    entity.Property(n => n.Id).HasColumnName("id");
+                    entity.Property(n => n.CampaignId).HasColumnName("campaign_id");
+                    entity.Property(n => n.Content)
+                        .HasColumnName("content")
+                        .HasDefaultValue("");
+                    entity.Property(n => n.CreatedAt)
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+                    entity.Property(n => n.UpdatedAt)
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("NOW()");
+                });
+
                 entity.ToTable("characters");
 
                 entity.HasOne(s => s.Campaign)
