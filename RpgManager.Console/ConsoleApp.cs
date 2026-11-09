@@ -774,6 +774,7 @@ namespace RpgManager.Console
 
             NoteEditor editor = new NoteEditor(note.Content);
             string? updatedContent = editor.Edit();
+            System.Console.WriteLine();
             if(updatedContent != null )
             {
                 OperationResult result = _noteService.UpdateNote(campaignId, updatedContent);
