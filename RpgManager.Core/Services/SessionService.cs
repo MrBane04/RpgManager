@@ -44,6 +44,29 @@ namespace RpgManager.Core.Services
             }
         }
 
+        public IReadOnlyList<Session> GetSessions(int campaignId, int page, int pageSize)
+        {
+            if(page <1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(page));
+            }
+            if(pageSize<1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageSize));
+            }
+            return _dbContext.Sessions
+                .Where(s => s.CampaignId == campaignId)
+                .OrderByDescending(s => s.SessionDate)
+                .Skip((page-1)*pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
+        public int CountSessions(int campaignId)
+        {
+            return _dbContext.Sessions
+                .Count(s=>s.CampaignId == campaignId);
+        }
+
         public IReadOnlyList<Session> GetSessions(int campaignId)
         {
             return _dbContext.Sessions

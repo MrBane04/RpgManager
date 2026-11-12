@@ -121,37 +121,64 @@ namespace RpgManager.Console
 
         public void ShowCharacters(int campaignId)
         {
-            IReadOnlyList<Character> characters = _characterService.GetCharacters(campaignId);
-
-            if (!characters.Any())
+            int page = 1;
+            int pageSize = 10;
+            int totalCharacters = _characterService.CountCharacters(campaignId);
+            int totalPages = (int)Math.Ceiling((double)totalCharacters / pageSize);
+            if(totalCharacters ==0)
             {
-                AnsiConsole.MarkupLine("[yellow]Ta kampania nie ma jeszcze żadnych postaci.[/]");
+                AnsiConsole.MarkupLine("[yellow]Ta kampania nie ma żadnych postaci.[/]");
                 WaitForContinue();
                 return;
             }
 
-            var table = new Table();
-            table.AddColumn("ID");
-            table.AddColumn("Imię");
-            table.AddColumn("Wiek");
-            table.AddColumn("Rasa");
-            table.AddColumn("Klasa");
-            table.AddColumn("Poziom");
-
-            foreach (var character in characters)
+            bool isRunning = true;
+            while(isRunning)
             {
-                table.AddRow(
-                    character.Id.ToString(),
-                    character.Name,
-                    character.Age.ToString(),
-                    character.Race ?? "-",
-                    character.CharacterClass ?? "-",
-                    character.Level.ToString()
-                );
+                AnsiConsole.Clear();
+                IReadOnlyList<Character> characters = _characterService.GetCharacters(campaignId, page,pageSize);
+                var table = new Table();
+                table.AddColumn("ID");
+                table.AddColumn("Imię");
+                table.AddColumn("Wiek");
+                table.AddColumn("Rasa");
+                table.AddColumn("Klasa");
+                table.AddColumn("Poziom");
+
+                foreach (var character in characters)
+                {
+                    table.AddRow(
+                        character.Id.ToString(),
+                        character.Name,
+                        character.Age.ToString(),
+                        character.Race ?? "-",
+                        character.CharacterClass ?? "-",
+                        character.Level.ToString()
+                    );
+                }
+                AnsiConsole.Write(table);
+                AnsiConsole.MarkupLine($"[grey]Strona {page} z {totalPages}[/]");
+                AnsiConsole.MarkupLine("[green]N[/] - Następna strona | [green]P[/] - Poprzednia strona | [green]Q[/] - Powrót");
+                ConsoleKeyInfo keyInfo = System.Console.ReadKey(true);
+                switch(keyInfo.Key)
+                {
+                    case ConsoleKey.N:
+                        if(page < totalPages)
+                        { page++; }
+                        break;
+                    case ConsoleKey.P:
+                        if(page>1)
+                        { page--; }
+                        break;
+                    case ConsoleKey.Q:
+                    case ConsoleKey.Escape:
+                        isRunning = false;
+                        break;
+                }
             }
 
-            AnsiConsole.Write(table);
-            WaitForContinue();
+
+            
         }
 
         public void SelectCharacterForDetails(int campaignId)
@@ -207,10 +234,10 @@ namespace RpgManager.Console
             AnsiConsole.MarkupLine("[bold]Dodawanie nowej postaci[/]");
 
             string name = AnsiConsole.Ask<string>("Imię postaci:");
-            int age = AnsiConsole.Ask<int>("Wiek:");
+            int age = AskPositiveNumber("Wiek:");
             string? race = AnsiConsole.Ask<string>("Rasa (opcjonalnie):");
             string? characterClass = AnsiConsole.Ask<string>("Klasa (opcjonalnie):");
-            int level = AnsiConsole.Ask<int>("Poziom:");
+            int level = AskPositiveNumber("Poziom:");
             string? description = AnsiConsole.Ask<string>("Opis (opcjonalnie):");
 
             race = string.IsNullOrWhiteSpace(race) ? null : race;
@@ -222,6 +249,20 @@ namespace RpgManager.Console
 
             ShowResult(result);
             WaitForContinue();
+        }
+
+        public int AskPositiveNumber(string prompt)
+        {
+            int value;
+            while(true)
+            {
+                value = AnsiConsole.Ask<int>(prompt);
+                if(value >0)
+                {
+                    return value;
+                }
+                AnsiConsole.MarkupLine("[red]Wartość musi być większa od zera.[/]");
+            }
         }
 
         public void EditCharacter(int campaignId)
@@ -392,34 +433,65 @@ namespace RpgManager.Console
 
         private void ShowSessions(int campaignId)
         {
-            IReadOnlyList<Session> sessionsList = _sessionService.GetSessions(campaignId);
-            if(sessionsList.Any())
+            int page = 1;
+            int pageSize = 10;
+            int totalSessions = _sessionService.CountSessions(campaignId);
+            int totalPages = (int)Math.Ceiling((double)totalSessions / pageSize);
+            if (totalSessions == 0)
             {
-                var table = new Table()
-                    .BorderColor(Color.Grey)
-                    .Title("[bold yellow]Sesje RPG[/]");
+                AnsiConsole.MarkupLine("[yellow]Nie ma żadnej sesji w tej kampani.[/]");
+                WaitForContinue();
+                return;
+            }
+            bool isRunning = true;
+            while (isRunning)
+            {
+                AnsiConsole.Clear();
+                IReadOnlyList<Session> sessionsList = _sessionService.GetSessions(campaignId,page,pageSize);
+                    var table = new Table()
+                        .BorderColor(Color.Grey)
+                        .Title("[bold yellow]Sesje RPG[/]");
 
-                table.AddColumn("[yellow]Id[/]", col => col.Centered());
-                table.AddColumn("[yellow]Tytuł sesji[/]", col => col.Centered());
-                table.AddColumn("[yellow]Data sesji[/]", col => col.Centered());
-                table.AddColumn("[yellow]czas trwania(min)[/]", col => col.Centered());
-                table.AddColumn("[yellow]Status(min)[/]", col => col.Centered());
-                foreach (Session session in sessionsList)
+                    table.AddColumn("[yellow]Id[/]", col => col.Centered());
+                    table.AddColumn("[yellow]Tytuł sesji[/]", col => col.Centered());
+                    table.AddColumn("[yellow]Data sesji[/]", col => col.Centered());
+                    table.AddColumn("[yellow]czas trwania(min)[/]", col => col.Centered());
+                    table.AddColumn("[yellow]Status(min)[/]", col => col.Centered());
+                    foreach (Session session in sessionsList)
+                    {
+                        table.AddRow(
+                            session.Id.ToString(),
+                            session.Title,
+                            session.SessionDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm"),
+                            session.DurationMinutes?.ToString() ?? "Nie podano",
+                            session.Status.ToString());
+                    }
+                    AnsiConsole.Write(table);
+                AnsiConsole.MarkupLine($"[grey]Strona {page}/{totalPages}[/]");
+                AnsiConsole.MarkupLine("[green]N[/] - Następna strona | [green]P[/] - Poprzednia strona | [green]Q[/] - Powrót");
+                ConsoleKeyInfo keyInfo = System.Console.ReadKey(true);
+                //AnsiConsole.MarkupLine($"[red]Odczytany klawisz: {keyInfo.Key}[/]");
+                switch (keyInfo.Key)
                 {
-                    table.AddRow(
-                        session.Id.ToString(),
-                        session.Title,
-                        session.SessionDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm"),
-                        session.DurationMinutes?.ToString() ?? "Nie podano",
-                        session.Status.ToString());
+                    case ConsoleKey.N:
+                        if(page<totalPages)
+                        {
+                            page++;
+                        }
+                        break;
+                    case ConsoleKey.P:
+                        if(page >1)
+                        {
+                            page--;
+                        }
+                        break;
+                    case ConsoleKey.Q:
+                    case ConsoleKey.Escape:
+                        isRunning = false;
+                        break;
                 }
-                AnsiConsole.Write(table);
+
             }
-            else
-            {
-                AnsiConsole.WriteLine("Nie ma żadnej sesji w tej kampanii.");
-            }
-            WaitForContinue();
         }
 
         private void SelectSessionForDetails(int campaignId)

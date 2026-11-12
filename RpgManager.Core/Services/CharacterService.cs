@@ -37,12 +37,32 @@ namespace RpgManager.Core.Services
             return new OperationResult(true, "Udało się dodać postać.");
         }
 
+        public IReadOnlyList<Character> GetCharacters(int campaignId,int page,int pageSize)
+        {
+            if (page < 1 || pageSize < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(page));
+            }
+            return _dbContext.Characters
+                .Where(c => c.CampaignId == campaignId)
+                .OrderBy(c => c.Name)
+                .Skip((page-1)*pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
+
         public IReadOnlyList<Character> GetCharacters(int campaignId)
         {
             return _dbContext.Characters
                 .Where(c => c.CampaignId == campaignId)
                 .OrderBy(c => c.Name)
                 .ToList();
+        }
+
+        public int CountCharacters(int campaignId)
+        {
+            return _dbContext.Characters
+                .Count(c => c.CampaignId == campaignId);
         }
 
         public Character? GetCharacter(int campaignId, int characterId)
